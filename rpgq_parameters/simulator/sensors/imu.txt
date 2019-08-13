@@ -1,0 +1,13 @@
+# parameter file for imu (MPU 9250)
+#
+# index : type: value: description
+# type: 0 boolean
+#       1 integer
+#       2 unsigned
+#       3 double
+#       4 double3D
+0: 3: 1000.0: update frequency [Hz]
+1: 3: 218.1: accelerometer filter bandwidth [Hz]
+2: 3: 184.0: gyroscope filter bandwidth [Hz]
+3: 3: 0.002943: (300.0*9.81*1e-6) accelerometer noise power spectral density [(m/s²) / sqrt(Hz)]
+4: 3: 0.000174533: (0.01*M_PI/180.0) gyroscope noise power spectral density [(rad/s) / sqrt(Hz)]

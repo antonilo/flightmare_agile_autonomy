@@ -1,0 +1,11 @@
+# parameter file for motor
+#
+# index : type: value: description
+# type: 0 boolean
+#       1 integer
+#       2 unsigned
+#       3 double
+#       4 double3D
+0: 3: 0.05: tau (first order system) [s]
+1: 3: 152.0: minimum angular velocity [rad/s]
+2: 3: 739.0: maximum angular velocity [rad/s]

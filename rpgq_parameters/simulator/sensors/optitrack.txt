@@ -1,0 +1,12 @@
+# parameter file for optitrack system
+#
+# index : type: value: description
+# type: 0 boolean
+#       1 integer
+#       2 unsigned
+#       3 double
+#       4 double3D
+0: 3: 200.0: update frequency [Hz]
+1: 3: 0.0002: xyz noise (SD) [m]
+2: 3: 0.003: rot noise (SD) [rad]
+3: 3: 0.02: latency [s] //0.04  

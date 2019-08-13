@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>rpgq_simulator</name>
+  <version>0.0.1</version>
+  <description>RPG quadrotor simulator.</description>
+  <license>TODO</license>
+
+  <maintainer email="brescianini@ifi.uzh.ch">Dario Brescianini</maintainer>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <buildtool_depend>catkin_simple</buildtool_depend>
+  
+  <depend>roscpp</depend>
+  <depend>cv_bridge</depend>
+  <depend>dvs_msgs</depend>
+  <depend>geometry_msgs</depend>
+  <depend>rosgraph_msgs</depend>
+  <depend>sensor_msgs</depend>
+  <depend>image_transport</depend>
+  <depend>assimp_catkin</depend>
+  <depend>rpgq_common</depend>
+  <depend>rpgq_components</depend>
+  <depend>rpgq_command_bridge</depend>
+  
+</package>

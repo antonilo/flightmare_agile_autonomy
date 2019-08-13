@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>example_multiagent</name>
+  <version>0.0.1</version>
+  <description>Example simulator with multiple quadrotor.</description>
+  <license>TODO</license>
+
+  <maintainer email="brescianini@ifi.uzh.ch">Dario Brescianini, Yunlong Song</maintainer>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <buildtool_depend>catkin_simple</buildtool_depend>
+
+    <depend>autopilot</depend>
+    <depend>rpg_rotors_interface</depend>
+    <depend>roscpp</depend>
+    <depend>rpgq_common</depend>
+    <depend>rpgq_simulator</depend>
+    <depend>quadrotor_common</depend>
+    <depend>quadrotor_msgs</depend>
+
+</package>

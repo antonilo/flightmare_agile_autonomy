@@ -1,0 +1,35 @@
+# Blender MTL File: 'quadrotor_vehicle_colored_cycles.blend'
+# Material Count: 3
+
+newmtl main_texture
+Ns 96.078431
+Ka 1.000000 1.000000 1.000000
+Kd 0.303197 0.303197 0.303197
+Ks 0.000000 0.000000 0.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 1
+map_Kd material/main_texture.png
+
+newmtl rotor_front
+Ns 96.078431
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.000000 0.000000 0.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 0.800000
+illum 1
+map_Kd material/rotor_front.png
+
+newmtl rotor_others
+Ns 96.078431
+Ka 1.000000 1.000000 1.000000
+Kd 0.098504 0.098504 0.098504
+Ks 0.000000 0.000000 0.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 0.800000
+illum 1
+map_Kd material/rotor_others.png

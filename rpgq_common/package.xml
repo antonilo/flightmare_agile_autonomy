@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<package format="2">
+	<name>rpgq_common</name>
+	<version>0.0.0</version>
+	<description>RPG quadrotor common.</description>
+	
+	<maintainer email="brescianini@ifi.uzh.ch">Dario Brescianini</maintainer>
+	<license>GNU GPL</license>
+	
+	<buildtool_depend>catkin</buildtool_depend>
+	<buildtool_depend>catkin_simple</buildtool_depend>
+
+	<depend>rpgq_msgs</depend>
+	
+</package>

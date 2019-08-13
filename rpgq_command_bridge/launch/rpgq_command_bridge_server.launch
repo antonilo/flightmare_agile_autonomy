@@ -1,0 +1,9 @@
+<launch>
+    <arg name="port" default="/dev/ttyUSB0" />                  <!-- name of serial port that is connected to the Laird module -->
+    <arg name="baud_rate" default="115200" />                   <!-- baud rate of serial port -->
+
+    <node pkg="rpgq_command_bridge" type="rpgq_command_bridge" name="rpgq_command_bridge_server" args="server" output="screen">
+        <param name="port" value="$(arg port)" />
+        <param name="baud_rate" value="$(arg baud_rate)" />
+    </node>
+</launch>

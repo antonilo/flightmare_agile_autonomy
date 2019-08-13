@@ -1,0 +1,22 @@
+
+<launch>
+    <arg name="debug" default="0" />
+    <arg name="editor" default="1" />
+    <arg name="quad_name" default="leonardo" />
+
+    <param name="use_sim_time" value="true"/>
+
+    <!-- Flightmare Renderer -->
+    <node name="rpgg_flightmare_Renderer" pkg="rpgq_simulator" type="RPG_FLIGHTMARE.x86_64" unless="$(arg editor)"/>
+
+
+    <!-- simulator -->
+    <node name="simulator" pkg="example_multiagent" type="example_multiagent" output="screen" launch-prefix="gdb -ex run --args" if="$(arg debug)" >
+        <param name="quad_name" value="$(arg quad_name)" />
+    </node>
+
+    <node name="simulator" pkg="example_multiagent" type="example_multiagent" output="screen" unless="$(arg debug)" >
+        <param name="quad_name" value="$(arg quad_name)" />
+    </node>
+
+</launch>

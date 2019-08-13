@@ -1,0 +1,17 @@
+# default parameter file for optitrack estimator
+#
+# index : type: value: description
+# type: 0 boolean
+#       1 integer
+#       2 unsigned
+#       3 double
+#       4 double3D
+0: 3: 0.03: position estimate filter constant [s]
+1: 3: 0.03: velocity estimate filter constant [s]
+2: 3: 0.03: attitude estimate filter constant [s]
+3: 3: 0.02: angular velocity estimate filter constant [s]
+4: 3: 0.05: thrust command dynamics time constant [s]
+5: 3: 0.05: angular velocity command dynamics time constant [s]
+6: 3: 0.039: system delay [s]
+7: 3: 0.5: blackout until reset [s]
+8: 3: 0.05: maximum integration step size [s]

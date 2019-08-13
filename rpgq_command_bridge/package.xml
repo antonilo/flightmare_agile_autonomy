@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<package format="2">
+	<name>rpgq_command_bridge</name>
+	<version>0.0.0</version>
+	<description>The command bridge allows for sending commands from a host computer to multiple clients.</description>
+	
+	<maintainer email="brescianini@ifi.uzh.ch">Dario Brescianini</maintainer>
+	<license>GNU GPL</license>
+	
+	<buildtool_depend>catkin</buildtool_depend>
+	<buildtool_depend>catkin_simple</buildtool_depend>
+	
+	<depend>roscpp</depend>
+	<depend>rpgq_common</depend>
+	<depend>rpgq_msgs</depend>	
+</package>
