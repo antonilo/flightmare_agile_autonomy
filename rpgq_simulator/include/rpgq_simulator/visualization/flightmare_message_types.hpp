@@ -47,6 +47,7 @@ namespace RPGQ
       bool is_depth{false};
       int output_index{0};
       // Transformation matrix from camera to vehicle body 4 x 4
+      // use 1-D vector for json convention
       std::vector<double> T_BC { 0.0, 0.0, 0.0, 0.0,
                                  0.0, 0.0, 0.0, 0.0,
                                  0.0, 0.0, 0.0, 0.0,
@@ -57,7 +58,7 @@ namespace RPGQ
     struct Vehicle_t
     {
       std::string ID;
-      // unity coordinate system left hand, y up
+      // unity coordinate system left-handed, y up
       std::vector<double> position{0.0, 0.0, 0.0};
       // unity quaternion (x, y, z, w)
       std::vector<double> rotation{0.0, 0.0, 0.0, 1.0};

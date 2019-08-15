@@ -45,7 +45,7 @@ namespace RPGQ
 
             // simulation functions
             void Run(double t);
-            void StartFlightmare();
+            void StartFlightmare(std::string scene_name);
 
             // add objects to rpgq_simulator
             void AddObject(std::shared_ptr<BaseObject> object);
@@ -53,17 +53,11 @@ namespace RPGQ
 
             // add objects to Unity for visulization or simulation
             void AddObjectToUnity(std::shared_ptr<UnityObject> object);
-            void AddObjectToUnity(std::shared_ptr<QuadRGBCamera> vehicle);
+            void AddObjectToUnity(std::shared_ptr<QuadrotorVehicle> vehicle);
+            void AddObjectToUnity(std::shared_ptr<QuadRGBCamera> rgb_vehicle);
+            void AddObjectToUnity(std::shared_ptr<QuadStereoRGBCamera> stereo_rgb_vehicle);
 
-            void UpdateUnityPoses(std::shared_ptr<QuadRGBCamera> vehicle,
-              size_t vehicle_idx);
-            void UpdateUnityPoses(std::shared_ptr<UnityObject> object,
-              size_t object_idx);
-
-            void RenderUnity(void);
-            void HandleUnityImage(std::shared_ptr<QuadRGBCamera> vehicle);
-
-          // public set functions
+            // public set functions
             void SetCommandSet(const rpgq_msgs::CommandSet &cmdSet);
             void SetFlightmare(const bool on);
             void SetScene(const std::string scene_name);
@@ -77,8 +71,11 @@ namespace RPGQ
         private:
             // general rpgq_simulator variables
             std::unordered_map<ObjectID, std::shared_ptr<BaseObject>> objects_;
-            std::unordered_map<ObjectID, std::shared_ptr<UnityObject>> unity_objects_;
-            ros::NodeHandle nh_, pnh_;
+            std::vector<std::shared_ptr<UnityObject>> unity_objects_;
+            std::vector<std::shared_ptr<QuadrotorVehicle>> unity_vehicles_;
+
+
+          ros::NodeHandle nh_, pnh_;
 
             // simulation timing variables
             std::shared_ptr<ExtTimer> timer_;
@@ -88,6 +85,7 @@ namespace RPGQ
 
             // flightmare
             bool flightmareReady_{false};
+            RenderMessage_t unity_output_;
             std::shared_ptr<FlightmareBridge> flightmareBridge_;
 
             // optitrack

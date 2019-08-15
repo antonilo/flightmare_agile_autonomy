@@ -1,0 +1,30 @@
+
+<launch>
+    <arg name="debug" default="0" />
+    <arg name="editor" default="1" />
+    <arg name="rpg" default="1" />
+    <arg name="quad_name" default="leonardo" />
+    <arg name="scene_name1" default="Warehouse/Scenes/DemoScene"/>
+    <arg name="scene_name2" default="FlightGogglesEnvironments/Abandoned_Factory_Morning"/>
+
+<!--    <arg name="scene_name" default="Warehouse/Scenes/DemoScene"/>-->
+
+    <param name="use_sim_time" value="true"/>
+
+    <!-- Flightmare Renderer -->
+<!--    <node name="rpgg_flightmare_Renderer" pkg="rpgq_simulator" type="RPG_FLIGHTGOGGLES.x86_64" unless="$(arg rpg)"/>-->
+
+    <node name="rpgg_flightmare_Renderer" pkg="rpgq_simulator" type="RPG_FLIGHTMARE.x86_64" unless="$(arg editor)"/>
+
+    <!-- simulator -->
+<!--    <node name="simulator" pkg="example_control" type="single_agent" output="screen" launch-prefix="gdb -ex run &#45;&#45;args" if="$(arg debug)" >-->
+<!--        <param name="quad_name" value="$(arg quad_name)" />-->
+<!--        <param name="scene_name" value="$(arg scene_name1)" />-->
+<!--    </node>-->
+
+    <node name="simulator" pkg="example_control" type="single_stereo_agent" output="screen" >
+        <param name="quad_name" value="$(arg quad_name)" />
+        <param name="scene_name" value="$(arg scene_name1)" />
+    </node>
+
+</launch>

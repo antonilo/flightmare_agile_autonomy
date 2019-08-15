@@ -26,8 +26,8 @@ namespace RPGQ
     std::vector<double> FlightmareBridge::positionROS2Unity(
       const Eigen::Vector3d & ros_pos)
     {
-      // tranform position from ROS coordinate system (right hand)
-      // to Unity coordinate system (left hand)
+      // tranform position from ROS coordinate system (right-handed)
+      // to Unity coordinate system (left-handed)
       std::vector<double> unity_pos{ros_pos[0], ros_pos[2], ros_pos[1]};
       return unity_pos;
     }
@@ -73,9 +73,23 @@ namespace RPGQ
       return unity_size;
     }
 
+    void FlightmareBridge::addQuad(std::shared_ptr<QuadrotorVehicle> quad)
+    {
+      // add quadrotor that does not have attached camera
+      Vehicle_t vehicle_t;
+      vehicle_t.ID = quad->GetID();
+      vehicle_t.position = positionROS2Unity(quad->GetPos());
+      vehicle_t.rotation = rotationROS2Unity(quad->GetQuat());
+      vehicle_t.size = sizeROS2Unity(quad->GetSize());
+      //
+      settings_.vehicles.push_back(vehicle_t);
+      pub_msg_.vehicles.push_back(vehicle_t);
+    }
+
     //
     void FlightmareBridge::addQuadRGB(std::shared_ptr<QuadRGBCamera> quad_rgb)
     {
+      // add quadrotor that has an RGB camera attached.
       Vehicle_t vehicle_t;
       std::shared_ptr<QuadrotorVehicle> quad = quad_rgb->GetQuad();
       vehicle_t.ID = quad->GetID();
@@ -101,6 +115,46 @@ namespace RPGQ
     }
 
     //
+    void FlightmareBridge::addQuadStereoRGB(std::shared_ptr<QuadStereoRGBCamera> stereo_quad_rgb)
+    {
+      // add quadrotor that has an RGB camera attached.
+      Vehicle_t vehicle_t;
+      std::shared_ptr<QuadrotorVehicle> quad = stereo_quad_rgb->GetQuad();
+      vehicle_t.ID = quad->GetID();
+      vehicle_t.position = positionROS2Unity(quad->GetPos());
+      vehicle_t.rotation = rotationROS2Unity(quad->GetQuat());
+      vehicle_t.size = sizeROS2Unity(quad->GetSize());
+
+      std::shared_ptr<RGBCamera> left_cam = stereo_quad_rgb->GetLeftRGBCamera();
+      Camera_t left_camera_t;
+      left_camera_t.ID = left_cam->GetID();
+      left_camera_t.T_BC = matrix44ROS2Unity(left_cam->GetRelPose());
+      left_camera_t.channels = left_cam->GetChannel();
+      left_camera_t.width = left_cam->GetWidth();
+      left_camera_t.height = left_cam->GetHeight();
+      left_camera_t.fov = left_cam->GetFov();
+      left_camera_t.depth_scale = left_cam->GetDepthScale();
+      left_camera_t.is_depth = false;
+      left_camera_t.output_index = 0;
+      vehicle_t.cameras.push_back(left_camera_t);
+
+      std::shared_ptr<RGBCamera> right_cam = stereo_quad_rgb->GetRightRGBCamera();
+      Camera_t right_camera_t;
+      right_camera_t.ID = right_cam->GetID();
+      right_camera_t.T_BC = matrix44ROS2Unity(right_cam->GetRelPose());
+      right_camera_t.channels = right_cam->GetChannel();
+      right_camera_t.width = right_cam->GetWidth();
+      right_camera_t.height = right_cam->GetHeight();
+      right_camera_t.fov = right_cam->GetFov();
+      right_camera_t.depth_scale = right_cam->GetDepthScale();
+      right_camera_t.is_depth = false;
+      right_camera_t.output_index = 1;
+      vehicle_t.cameras.push_back(right_camera_t);
+      //
+      settings_.vehicles.push_back(vehicle_t);
+      pub_msg_.vehicles.push_back(vehicle_t);
+    }
+    //
     void FlightmareBridge::addObject(std::shared_ptr<UnityObject> obj)
     {
       Object_t object_t;
@@ -114,11 +168,11 @@ namespace RPGQ
       pub_msg_.objects.push_back(object_t);
     }
 
-    void FlightmareBridge::updateVehiclePoses(const FlightmareTypes::USecs ntime,
-      std::shared_ptr<QuadRGBCamera> quad_rgb,
+    void FlightmareBridge::updateVehiclePoses(
+      const FlightmareTypes::USecs ntime,
+      std::shared_ptr<QuadrotorVehicle> quad,
       size_t vehicle_idx)
     {
-      std::shared_ptr<QuadrotorVehicle> quad = quad_rgb->GetQuad();
       pub_msg_.ntime = ntime;
       pub_msg_.vehicles[vehicle_idx].position = positionROS2Unity(quad->GetPos());
       pub_msg_.vehicles[vehicle_idx].rotation = rotationROS2Unity(quad->GetQuat());
@@ -193,9 +247,8 @@ namespace RPGQ
       return done;
     }
 
-    void FlightmareBridge::handleImages(std::shared_ptr<QuadRGBCamera> quad_rgb)
+    void FlightmareBridge::handleOutput(RenderMessage_t & output)
     {
-      RenderMessage_t  output;
       // create new message object
       zmqpp::message msg;
       sub_.receive(msg);
@@ -206,6 +259,10 @@ namespace RPGQ
 
       ros::Time image_timestamp;
       image_timestamp = image_timestamp.fromNSec(sub_msg.ntime);
+
+      std::cout << "Unity Delay (nano sec): "
+                << (ros::Time::now().toNSec() - image_timestamp.toNSec())*1e-9
+                << std::endl;
 
       ensureBufferIsAllocated(sub_msg);
 
@@ -238,9 +295,6 @@ namespace RPGQ
       }
       output.sub_msg = sub_msg;
       num_frames_++;
-
-       std::shared_ptr<RGBCamera> cam = quad_rgb->GetRGBCamera();
-       cam->feedImageQueue(image_timestamp, output.images.at(0));
     }
   } // namespace Simulator
 } // namespace RPGQ

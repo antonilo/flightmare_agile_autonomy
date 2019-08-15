@@ -11,21 +11,23 @@ namespace RPGQ
   {
     class IMU;
 
-    class QuadRGBCamera : public CompositeObject
+    class QuadStereoRGBCamera : public CompositeObject
     {
      public:
       // constructor & deconstructor
-      QuadRGBCamera(ObjectID id, const Node* prevSimNode, USecs maxSimUSecsInterval);
-      ~QuadRGBCamera(){};
+      QuadStereoRGBCamera(ObjectID id, const Node* prevSimNode, USecs maxSimUSecsInterval);
+      ~QuadStereoRGBCamera(){};
 
       // Adding objects ...
       void AddObject(std::shared_ptr<BaseObject> object);
 
       // public get functions
       const std::shared_ptr<QuadrotorVehicle> GetQuad(void)
-        {return quadPtr_;};
-      const std::shared_ptr<RGBCamera> GetRGBCamera(void)
-        {return rgbCameraPtr_;};
+      {return quadPtr_;};
+      const std::shared_ptr<RGBCamera> GetLeftRGBCamera(void)
+      {return leftRGBCameraPtr_;};
+      const std::shared_ptr<RGBCamera> GetRightRGBCamera(void)
+      {return rightRGBCameraPtr_;};
 
      private:
       // (user defined) mediators
@@ -38,8 +40,8 @@ namespace RPGQ
 
       // auxiliary variables
       std::shared_ptr<QuadrotorVehicle> quadPtr_;
-      std::shared_ptr<RGBCamera> rgbCameraPtr_;
-      std::shared_ptr<IMU> imuPtr_;
+      std::shared_ptr<RGBCamera> leftRGBCameraPtr_, rightRGBCameraPtr_;
+      std::shared_ptr<IMU> leftImuPtr_, rightImuPtr_;
     };
   } //  namespace Simulator
 } // namespace RPGQ

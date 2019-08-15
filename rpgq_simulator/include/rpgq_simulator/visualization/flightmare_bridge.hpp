@@ -12,8 +12,10 @@
 
 #include "rpgq_simulator/visualization/flightmare_message_types.hpp"
 #include "rpgq_simulator/framework/unity/unity_object.h"
-#include "rpgq_simulator/implementation/objects/quadrotor_vehicle/quad_and_rgb_camera.h"
+#include "rpgq_simulator/framework/objects/base_object.h"
 #include "rpgq_simulator/implementation/objects/quadrotor_vehicle/quadrotor_vehicle.h"
+#include "rpgq_simulator/implementation/objects/quadrotor_vehicle/quad_and_rgb_camera.h"
+#include "rpgq_simulator/implementation/objects/quadrotor_vehicle/quad_and_stereo_rgb_camera.h"
 
 using json = nlohmann::json;
 
@@ -35,20 +37,23 @@ namespace RPGQ
 
       // public add functions
       void addObject(std::shared_ptr<UnityObject> object);
+      void addQuad(std::shared_ptr<QuadrotorVehicle> quad);
       void addQuadRGB(std::shared_ptr<QuadRGBCamera> quad_rbg);
+      void addQuadStereoRGB(std::shared_ptr<QuadStereoRGBCamera> quad_stereo_rbg);
 
-      void updateVehiclePoses(const FlightmareTypes::USecs ntime,
-        std::shared_ptr<QuadRGBCamera> quad_rgb,
-        size_t vehicle_idx);
+
       void updateObjectPoses(const FlightmareTypes::USecs ntime,
-        std::shared_ptr<UnityObject> object,
-        size_t object_idx);
+                             std::shared_ptr<UnityObject> object,
+                             size_t object_idx);
+      void updateVehiclePoses(const FlightmareTypes::USecs ntime,
+                           std::shared_ptr<QuadrotorVehicle> quad,
+                           size_t vehicle_idx);
 
       // public connect function
       bool connectUnity();
       // public get functions
       void getRender(void);
-      void handleImages(std::shared_ptr<QuadRGBCamera> quad_rbg);
+      void handleOutput(RenderMessage_t & output);
 
       static std::shared_ptr<FlightmareBridge> getInstance(void) {
         static std::shared_ptr<FlightmareBridge> fmb = std::make_shared<FlightmareBridge>();

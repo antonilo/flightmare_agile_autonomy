@@ -91,6 +91,24 @@ namespace RPGQ
                     object.second->RunSimulation(dt);
                 }
 
+                if (flightmareReady_)
+                {
+                  int unity_idx = 0;
+                  for (const auto & unity_object : unity_objects_)
+                  {
+                    flightmareBridge_->updateObjectPoses(1000*timer_->ElapsedUSeconds(), unity_object, unity_idx);
+                    unity_idx++;
+                  }
+                  int vehicle_idx = 0;
+                  for (const auto & unity_vehicle : unity_vehicles_)
+                  {
+                    flightmareBridge_->updateVehiclePoses(1000*timer_->ElapsedUSeconds(), unity_vehicle, vehicle_idx);
+                    vehicle_idx++;
+                  }
+                  flightmareBridge_->getRender();
+
+                  flightmareBridge_->handleOutput(unity_output_);
+                }
 
                 // push timer forward
                 timer_->AdvanceUSeconds(dt);
@@ -133,6 +151,7 @@ namespace RPGQ
 
         void Simulator::AddObjectToUnity(std::shared_ptr<UnityObject> unity_object)
         {
+          unity_objects_.push_back(unity_object);
           if (flightmareBridge_ != nullptr)
           {
             flightmareBridge_->addObject(unity_object);
@@ -141,53 +160,45 @@ namespace RPGQ
           }
         }
 
-        void Simulator::AddObjectToUnity(std::shared_ptr<QuadRGBCamera> vehicle)
+        void Simulator::AddObjectToUnity(std::shared_ptr<QuadrotorVehicle> vehicle)
         {
+          unity_vehicles_.push_back(vehicle);
           if (flightmareBridge_ != nullptr){
-            flightmareBridge_->addQuadRGB(vehicle);
+            flightmareBridge_->addQuad(vehicle);
           } else {
             ROS_ERROR("[%s] Flightmare Bridge is nullptr, did you forgot to initialize it.", pnh_.getNamespace().c_str());
           }
         }
 
-        void Simulator::StartFlightmare()
+        void Simulator::AddObjectToUnity(std::shared_ptr<QuadRGBCamera> rgb_vehicle)
+        {
+          unity_vehicles_.push_back(rgb_vehicle->GetQuad());
+          if (flightmareBridge_ != nullptr){
+            flightmareBridge_->addQuadRGB(rgb_vehicle);
+          } else {
+            ROS_ERROR("[%s] Flightmare Bridge is nullptr, did you forgot to initialize it.", pnh_.getNamespace().c_str());
+          }
+        }
+
+
+        void Simulator::AddObjectToUnity(std::shared_ptr<QuadStereoRGBCamera> stereo_rgb_vehicle)
+        {
+          unity_vehicles_.push_back(stereo_rgb_vehicle->GetQuad());
+          if (flightmareBridge_ != nullptr){
+            flightmareBridge_->addQuadStereoRGB(stereo_rgb_vehicle);
+          } else {
+            ROS_ERROR("[%s] Flightmare Bridge is nullptr, did you forgot to initialize it.", pnh_.getNamespace().c_str());
+          }
+        }
+
+        void Simulator::StartFlightmare(std::string scene_name)
         {
           if(flightmareBridge_ != nullptr)
           {
-            flightmareBridge_->setScene("Warehouse/Scenes/DemoScene");
-            flightmareReady_ = flightmareBridge_->connectUnity();
+             flightmareBridge_->setScene(scene_name);
+             flightmareReady_ = flightmareBridge_->connectUnity();
           } else {
             ROS_ERROR("[%s] Flightmare Bridge is nullptr, did you forgot to initialize it.", pnh_.getNamespace().c_str());
-          }
-        }
-
-        void Simulator::UpdateUnityPoses(std::shared_ptr<QuadRGBCamera> vehicle,
-          size_t vehicle_idx)
-        {
-          if (flightmareReady_){
-            flightmareBridge_->updateVehiclePoses(1000*timer_->ElapsedUSeconds(), vehicle, vehicle_idx);
-          }
-        }
-
-        void Simulator::UpdateUnityPoses(std::shared_ptr<UnityObject> unity_object,
-          size_t object_idx)
-        {
-          if (flightmareReady_){
-            flightmareBridge_->updateObjectPoses(1000*timer_->ElapsedUSeconds(), unity_object, object_idx);
-          }
-        }
-
-        void Simulator::RenderUnity(void)
-        {
-          if (flightmareReady_){
-              flightmareBridge_->getRender();
-          }
-        }
-
-        void Simulator::HandleUnityImage(std::shared_ptr<QuadRGBCamera> vehicle)
-        {
-          if (flightmareReady_){
-            flightmareBridge_->handleImages(vehicle);
           }
         }
 
@@ -231,7 +242,6 @@ namespace RPGQ
                 optitrack_->AddObject(std::static_pointer_cast<PhysicalObject>(object));
             }
         }
-
 
         // auxiliary functions
         void Simulator::AddObjectToDirectlyControlledObjectsRecursively(std::shared_ptr<BaseObject> object)

@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>example_multiagent</name>
+  <name>example_control</name>
   <version>0.0.1</version>
   <description>Example simulator with multiple quadrotor.</description>
   <license>TODO</license>

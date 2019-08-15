@@ -3,8 +3,6 @@
 // rpgq rpgq_simulator
 #include <rpgq_simulator/implementation/sensors/imu.h>
 
-
-
 namespace RPGQ
 {
   namespace Simulator

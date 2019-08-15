@@ -31,6 +31,13 @@ int main(int argc, char * argv[]) {
   QuadrotorID quadID1 = QuadrotorNameToID(quadName1);
   QuadrotorID quadID2 = QuadrotorNameToID(quadName2);
 
+  std::string sceneName;
+  if (!pnh.getParam("scene_name", sceneName))
+  {
+    ROS_ERROR("[%s] Could not determine scene name.", pnh.getNamespace().c_str());
+    return -1;
+  }
+
   // create simulator
   std::shared_ptr<Simulator::Simulator> sim = std::make_shared<Simulator::Simulator>();
 
@@ -109,7 +116,7 @@ int main(int argc, char * argv[]) {
     // enable visualization and add objects
     if (!sim->FlightmareIsReady())
     {
-      sim->StartFlightmare();
+      sim->StartFlightmare(sceneName);
     }
     // start measuring time
     loopTimer.Reset();
@@ -171,14 +178,6 @@ int main(int argc, char * argv[]) {
     est2.FeedCommandQueue(cmdSet2);
     sim->SetCommandSet(cmdSet2);
     sim->Run(1.0/CONTROL_UPDATE_RATE);
-
-    sim->UpdateUnityPoses(quadRGB1, 0);
-    sim->UpdateUnityPoses(quadRGB2, 1);
-
-    // send updated pose to unity
-    sim->RenderUnity();
-    // retrieve new images from unity
-    sim->HandleUnityImage(quadRGB1);
 
     // stop measuring time, sleep accordingly
     double secsToSleep = 1.0/CONTROL_UPDATE_RATE - loopTimer.ElapsedSeconds();
