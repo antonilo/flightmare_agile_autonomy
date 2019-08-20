@@ -64,18 +64,18 @@ namespace RPGQ
                 {
                     while (!(ROSTIME_TO_USECS(commandSetQueue_.front().header.stamp) > timer_->ElapsedUSeconds() - lairdDelay_))
                     {
-                        // send it to all objects
-                        for (const auto & object : directlyControlledObjects_)
-                        {
-                            object.second->SetCommandSet(commandSetQueue_.front());
-                        }
+                      // send it to all objects
+                      for (const auto & object : directlyControlledObjects_)
+                      {
+                        object.second->SetCommandSet(commandSetQueue_.front());
+                      }
+                      // remove command set from queue
+                      commandSetQueue_.pop();
 
-                        // remove command set from queue
-                        commandSetQueue_.pop();
-                        if (commandSetQueue_.empty())
-                        {
-                            break;
-                        }
+                      if (commandSetQueue_.empty())
+                      {
+                          break;
+                      }
                     }
 
                     if (!commandSetQueue_.empty())
@@ -93,19 +93,7 @@ namespace RPGQ
 
                 if (flightmareReady_)
                 {
-                  int unity_idx = 0;
-                  for (const auto & unity_object : unity_objects_)
-                  {
-                    flightmareBridge_->updateObjectPoses(1000*timer_->ElapsedUSeconds(), unity_object, unity_idx);
-                    unity_idx++;
-                  }
-                  int vehicle_idx = 0;
-                  for (const auto & unity_vehicle : unity_vehicles_)
-                  {
-                    flightmareBridge_->updateVehiclePoses(1000*timer_->ElapsedUSeconds(), unity_vehicle, vehicle_idx);
-                    vehicle_idx++;
-                  }
-                  flightmareBridge_->getRender();
+                  flightmareBridge_->getRender(1000*timer_->ElapsedUSeconds());
 
                   flightmareBridge_->handleOutput(unity_output_);
                 }
@@ -151,7 +139,7 @@ namespace RPGQ
 
         void Simulator::AddObjectToUnity(std::shared_ptr<UnityObject> unity_object)
         {
-          unity_objects_.push_back(unity_object);
+          // unity_objects_.push_back(unity_object);
           if (flightmareBridge_ != nullptr)
           {
             flightmareBridge_->addObject(unity_object);
@@ -162,7 +150,7 @@ namespace RPGQ
 
         void Simulator::AddObjectToUnity(std::shared_ptr<QuadrotorVehicle> vehicle)
         {
-          unity_vehicles_.push_back(vehicle);
+          // unity_vehicles_.push_back(vehicle);
           if (flightmareBridge_ != nullptr){
             flightmareBridge_->addQuad(vehicle);
           } else {
@@ -172,7 +160,7 @@ namespace RPGQ
 
         void Simulator::AddObjectToUnity(std::shared_ptr<QuadRGBCamera> rgb_vehicle)
         {
-          unity_vehicles_.push_back(rgb_vehicle->GetQuad());
+          // unity_vehicles_.push_back(rgb_vehicle->GetQuad());
           if (flightmareBridge_ != nullptr){
             flightmareBridge_->addQuadRGB(rgb_vehicle);
           } else {
@@ -183,7 +171,7 @@ namespace RPGQ
 
         void Simulator::AddObjectToUnity(std::shared_ptr<QuadStereoRGBCamera> stereo_rgb_vehicle)
         {
-          unity_vehicles_.push_back(stereo_rgb_vehicle->GetQuad());
+          // unity_vehicles_.push_back(stereo_rgb_vehicle->GetQuad());
           if (flightmareBridge_ != nullptr){
             flightmareBridge_->addQuadStereoRGB(stereo_rgb_vehicle);
           } else {

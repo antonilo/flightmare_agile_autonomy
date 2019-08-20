@@ -4,6 +4,7 @@
 #include <fstream>
 #include <chrono>
 #include <unordered_map>
+#include <map>
 
 // Include ZMQ bindings for comms with Unity.
 #include <iostream>
@@ -42,17 +43,13 @@ namespace RPGQ
       void addQuadStereoRGB(std::shared_ptr<QuadStereoRGBCamera> quad_stereo_rbg);
 
 
-      void updateObjectPoses(const FlightmareTypes::USecs ntime,
-                             std::shared_ptr<UnityObject> object,
-                             size_t object_idx);
-      void updateVehiclePoses(const FlightmareTypes::USecs ntime,
-                           std::shared_ptr<QuadrotorVehicle> quad,
-                           size_t vehicle_idx);
+      void updateObjectPoses(size_t object_idx);
+      void updateVehiclePoses(size_t vehicle_idx);
 
       // public connect function
       bool connectUnity();
       // public get functions
-      void getRender(void);
+      void getRender(const FlightmareTypes::USecs & ntime);
       void handleOutput(RenderMessage_t & output);
 
       static std::shared_ptr<FlightmareBridge> getInstance(void) {
@@ -70,7 +67,13 @@ namespace RPGQ
       // TODO
       SettingsMessage_t settings_;
       PubMessage_t pub_msg_;
-      SubMessage_t sub_msg_;
+      //
+      std::vector<std::shared_ptr<UnityObject>> unity_objects_;
+      std::vector<std::shared_ptr<QuadrotorVehicle>> unity_vehicles_;
+      // std::vector<std::shared_ptr<QuadRGBCamera>> unity_rgb_vehicles_;
+      // std::vector<std::shared_ptr<QuadStereoRGBCamera>> unity_stereo_rgh_vehicles_;
+      //
+      std::unordered_map<std::string, std::shared_ptr<RGBCamera>> unity_cameras_;
 
       // ZMQ variables and functions
       std::string client_address_{"tcp://*"};

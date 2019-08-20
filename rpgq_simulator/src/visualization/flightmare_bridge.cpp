@@ -84,6 +84,8 @@ namespace RPGQ
       //
       settings_.vehicles.push_back(vehicle_t);
       pub_msg_.vehicles.push_back(vehicle_t);
+      //
+      unity_vehicles_.push_back(quad);
     }
 
     //
@@ -106,12 +108,16 @@ namespace RPGQ
       camera_t.height = cam->GetHeight();
       camera_t.fov = cam->GetFov();
       camera_t.depth_scale = cam->GetDepthScale();
+      camera_t.post_processing = cam->GetPostProcessing();
       camera_t.is_depth = false;
       camera_t.output_index = 0;
       vehicle_t.cameras.push_back(camera_t);
       //
       settings_.vehicles.push_back(vehicle_t);
       pub_msg_.vehicles.push_back(vehicle_t);
+      //
+      unity_vehicles_.push_back(quad_rgb->GetQuad());
+      unity_cameras_.emplace(vehicle_t.ID+"_"+camera_t.ID, cam);
     }
 
     //
@@ -134,6 +140,7 @@ namespace RPGQ
       left_camera_t.height = left_cam->GetHeight();
       left_camera_t.fov = left_cam->GetFov();
       left_camera_t.depth_scale = left_cam->GetDepthScale();
+      left_camera_t.post_processing = left_cam->GetPostProcessing();
       left_camera_t.is_depth = false;
       left_camera_t.output_index = 0;
       vehicle_t.cameras.push_back(left_camera_t);
@@ -147,12 +154,17 @@ namespace RPGQ
       right_camera_t.height = right_cam->GetHeight();
       right_camera_t.fov = right_cam->GetFov();
       right_camera_t.depth_scale = right_cam->GetDepthScale();
+      right_camera_t.post_processing = right_cam->GetPostProcessing();
       right_camera_t.is_depth = false;
       right_camera_t.output_index = 1;
       vehicle_t.cameras.push_back(right_camera_t);
       //
       settings_.vehicles.push_back(vehicle_t);
       pub_msg_.vehicles.push_back(vehicle_t);
+      //
+      unity_vehicles_.push_back(stereo_quad_rgb->GetQuad());
+      unity_cameras_.emplace(vehicle_t.ID+"_"+left_camera_t.ID, left_cam);
+      unity_cameras_.emplace(vehicle_t.ID+"_"+right_camera_t.ID, right_cam);
     }
     //
     void FlightmareBridge::addObject(std::shared_ptr<UnityObject> obj)
@@ -166,31 +178,35 @@ namespace RPGQ
       //
       settings_.objects.push_back(object_t);
       pub_msg_.objects.push_back(object_t);
+      //
+      unity_objects_.push_back(obj);
     }
 
-    void FlightmareBridge::updateVehiclePoses(
-      const FlightmareTypes::USecs ntime,
-      std::shared_ptr<QuadrotorVehicle> quad,
-      size_t vehicle_idx)
+    void FlightmareBridge::updateVehiclePoses( size_t vehicle_idx)
     {
-      pub_msg_.ntime = ntime;
+      std::shared_ptr<QuadrotorVehicle> quad = unity_vehicles_[vehicle_idx];
       pub_msg_.vehicles[vehicle_idx].position = positionROS2Unity(quad->GetPos());
       pub_msg_.vehicles[vehicle_idx].rotation = rotationROS2Unity(quad->GetQuat());
     }
 
-    void FlightmareBridge::updateObjectPoses(
-      const FlightmareTypes::USecs ntime,
-      std::shared_ptr<UnityObject> object,
-      size_t object_idx)
+    void FlightmareBridge::updateObjectPoses( size_t object_idx)
     {
-      pub_msg_.ntime = ntime;
+      std::shared_ptr<UnityObject> object = unity_objects_[object_idx];
       pub_msg_.objects[object_idx].position = positionROS2Unity(object->GetPos());
       pub_msg_.objects[object_idx].rotation = rotationROS2Unity(object->GetQuat());
     }
 
     // public get functions
-    void FlightmareBridge::getRender(void)
+    void FlightmareBridge::getRender(const FlightmareTypes::USecs & ntime)
     {
+      pub_msg_.ntime = ntime;
+      for (size_t idx=0; idx < unity_objects_.size(); idx++){
+        updateObjectPoses(idx);
+      }
+      for (size_t idx=0; idx < unity_vehicles_.size(); idx++){
+        updateVehiclePoses(idx);
+      }
+
       // create new message object
       zmqpp::message msg;
       // add topic header
@@ -260,41 +276,90 @@ namespace RPGQ
       ros::Time image_timestamp;
       image_timestamp = image_timestamp.fromNSec(sub_msg.ntime);
 
-      std::cout << "Unity Delay (nano sec): "
-                << (ros::Time::now().toNSec() - image_timestamp.toNSec())*1e-9
-                << std::endl;
-
       ensureBufferIsAllocated(sub_msg);
-
-      output.images.resize(sub_msg.cameraIDs.size());
-
-      for (uint i=0; i < sub_msg.cameraIDs.size(); ++i)
+      size_t image_i=1; size_t camera_i=0;
+      for (const auto & vehicle : settings_.vehicles)
       {
-        // Reshape the received image
-        // Calculate how long the casted and reshaped image will be.
-        uint32_t imageLen = sub_msg.camWidth * sub_msg.camHeight * sub_msg.channels[i];
-        // Get raw image bytes from ZMQ message.
-        // WARNING: This is a zero-copy operation that also casts the input to an array of unit8_t.
-        // when the message is deleted, this pointer is also dereferenced.
-        const uint8_t* imageData;
-        msg.get(imageData, i+1);
-        // ALL images comes as 3-channel RGB images from Unity. Calculate the row length
-        uint32_t bufferRowLength = sub_msg.camWidth * sub_msg.channels[i];
+        for (const auto & cam : vehicle.cameras) {
+          std::unordered_map<std::string, cv::Mat> images;
+          std::string camera_ID = vehicle.ID + "_" + cam.ID;
+          std::shared_ptr<RGBCamera> rgb_camera = unity_cameras_[camera_ID];
 
-        // Pack image into cv::Mat
-        cv::Mat new_image = cv::Mat(sub_msg.camHeight, sub_msg.camWidth, CV_MAKETYPE(CV_8U, sub_msg.channels[i]));
-        memcpy(new_image.data, imageData, imageLen);
-        // Flip image since OpenCV origin is upper left, but Unity's is lower left.
-        cv::flip(new_image, new_image, 0);
+          uint32_t imageLen = sub_msg.camWidth * sub_msg.camHeight * sub_msg.channels[camera_i];
+          // Get raw image bytes from ZMQ message.
+          // WARNING: This is a zero-copy operation that also casts the input to an array of unit8_t.
+          // when the message is deleted, this pointer is also dereferenced.
+          const uint8_t *imageData;
+          msg.get(imageData, image_i);
+          image_i = image_i + 1;
+          //
+          uint32_t bufferRowLength = sub_msg.camWidth * sub_msg.channels[camera_i];
+          // Pack image into cv::Mat
+          cv::Mat new_image = cv::Mat(sub_msg.camHeight, sub_msg.camWidth,
+                                      CV_MAKETYPE(CV_8U, sub_msg.channels[camera_i]));
+          memcpy(new_image.data, imageData, imageLen);
+          // Flip image since OpenCV origin is upper left, but Unity's is lower left.
+          cv::flip(new_image, new_image, 0);
 
-        // Tell OpenCv that the input is RGB.
-        if (sub_msg.channels[i]==3){
-          cv::cvtColor(new_image, new_image, CV_RGB2BGR);
+          // Tell OpenCv that the input is RGB.
+          if (sub_msg.channels[camera_i] == 3) {
+            cv::cvtColor(new_image, new_image, CV_RGB2BGR);
+          }
+          images.emplace("rgb", new_image);
+          for (const auto & pp : cam.post_processing){
+            std::cout << "post processing : " << pp << std::endl;
+            //
+            const uint8_t *pp_imageData;
+            msg.get(pp_imageData, image_i);
+            image_i = image_i + 1;
+            //
+            uint32_t pp_bufferRowLength = sub_msg.camWidth * sub_msg.channels[camera_i];
+            // Pack image into cv::Mat
+            cv::Mat pp_image = cv::Mat(sub_msg.camHeight, sub_msg.camWidth,
+                                        CV_MAKETYPE(CV_8U, sub_msg.channels[camera_i]));
+            memcpy(pp_image.data, pp_imageData, imageLen);
+            // Flip image since OpenCV origin is upper left, but Unity's is lower left.
+            cv::flip(pp_image, pp_image, 0);
+
+            // Tell OpenCv that the input is RGB.
+            if (sub_msg.channels[camera_i] == 3) {
+              cv::cvtColor(pp_image, pp_image, CV_RGB2BGR);
+            }
+            images.emplace(pp, pp_image);
+          }
+          //
+          rgb_camera->feedImageQueue(image_timestamp, images);
         }
-        output.images.at(i) = new_image;
       }
-      output.sub_msg = sub_msg;
-      num_frames_++;
+//      output.images.resize(sub_msg.cameraIDs.size());
+//
+//      for (uint i=0; i < sub_msg.cameraIDs.size(); ++i)
+//      {
+//        // Reshape the received image
+//        // Calculate how long the casted and reshaped image will be.
+//        uint32_t imageLen = sub_msg.camWidth * sub_msg.camHeight * sub_msg.channels[i];
+//        // Get raw image bytes from ZMQ message.
+//        // WARNING: This is a zero-copy operation that also casts the input to an array of unit8_t.
+//        // when the message is deleted, this pointer is also dereferenced.
+//        const uint8_t* imageData;
+//        msg.get(imageData, i+1);
+//        // ALL images comes as 3-channel RGB images from Unity. Calculate the row length
+//        uint32_t bufferRowLength = sub_msg.camWidth * sub_msg.channels[i];
+//
+//        // Pack image into cv::Mat
+//        cv::Mat new_image = cv::Mat(sub_msg.camHeight, sub_msg.camWidth, CV_MAKETYPE(CV_8U, sub_msg.channels[i]));
+//        memcpy(new_image.data, imageData, imageLen);
+//        // Flip image since OpenCV origin is upper left, but Unity's is lower left.
+//        cv::flip(new_image, new_image, 0);
+//
+//        // Tell OpenCv that the input is RGB.
+//        if (sub_msg.channels[i]==3){
+//          cv::cvtColor(new_image, new_image, CV_RGB2BGR);
+//        }
+//        output.images.at(i) = new_image;
+//      }
+//      output.sub_msg = sub_msg;
+//      num_frames_++;
     }
   } // namespace Simulator
 } // namespace RPGQ

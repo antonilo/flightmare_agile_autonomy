@@ -22,14 +22,13 @@
 <!--        <param name="scene_name" value="$(arg scene_name1)" />-->
 <!--    </node>-->
 
-    <node name="simulator" pkg="example_control" type="single_agent" output="screen" if="$(arg rpg)" >
+    <node name="simulator" pkg="example_control" type="single_agent" output="screen" launch-prefix="gdb -ex run --args" if="$(arg debug)" >
         <param name="quad_name" value="$(arg quad_name)" />
         <param name="scene_name" value="$(arg scene_name1)" />
     </node>
 
-    <node name="simulator" pkg="example_control" type="single_agent" output="screen" unless="$(arg rpg)" >
+    <node name="simulator" pkg="example_control" type="single_agent" output="screen" unless="$(arg debug)">
         <param name="quad_name" value="$(arg quad_name)" />
-        <param name="scene_name" value="$(arg scene_name2)" />
+        <param name="scene_name" value="$(arg scene_name1)" />
     </node>
-
 </launch>

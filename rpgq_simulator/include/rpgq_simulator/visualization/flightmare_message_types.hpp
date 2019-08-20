@@ -46,6 +46,8 @@ namespace RPGQ
       // metadata
       bool is_depth{false};
       int output_index{0};
+      //
+      std::vector<std::string> post_processing;
       // Transformation matrix from camera to vehicle body 4 x 4
       // use 1-D vector for json convention
       std::vector<double> T_BC { 0.0, 0.0, 0.0, 0.0,
@@ -128,6 +130,7 @@ namespace RPGQ
                {"fov", o.fov},
                {"T_BC", o.T_BC},
                {"isDepth", o.is_depth},
+               {"post_processing", o.post_processing},
                {"depthScale", o.depth_scale},
                {"outputIndex", o.output_index}
       };

@@ -38,11 +38,19 @@ int main(int argc, char * argv[]) {
   std::shared_ptr<Simulator::Simulator> sim = std::make_shared<Simulator::Simulator>();
 
   // create a quadrotor with a RGB Camera on it.
-  std::shared_ptr<Simulator::QuadRGBCamera> quadRGB = std::make_shared<Simulator::QuadRGBCamera>(quadName, nullptr, 1000000);
+  std::shared_ptr<Simulator::QuadRGBCamera> quadRGB =
+    std::make_shared<Simulator::QuadRGBCamera>(quadName, nullptr, 1000000);
+  //
   std::shared_ptr<Simulator::QuadrotorVehicle> quad = quadRGB->GetQuad();
   quad->SetPos(Eigen::Vector3d(0.0, 0.0, 2.0));
   quad->SetQuat(Eigen::Quaterniond(std::cos(0.5*M_PI_2),0.0,0.0,std::sin(0.5*M_PI_2)));
-  quad->SetSize(Eigen::Vector3d(0.3, 0.3, 0.3));
+  quad->SetSize(Eigen::Vector3d(0.1, 0.1, 0.1));
+  //
+  std::shared_ptr<Simulator::RGBCamera> rgb = quadRGB->GetRGBCamera();
+  rgb->EnableDepth(true);
+  rgb->EnableOpticalFlow(true);
+  rgb->EnableObjectSegment(true);
+  rgb->EnableCategorySegment(true);
   //
   sim->AddObjectToOptitrack(quad);
   //

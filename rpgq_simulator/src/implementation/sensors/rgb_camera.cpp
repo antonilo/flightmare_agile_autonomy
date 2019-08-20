@@ -14,7 +14,10 @@ namespace RPGQ
       // set up publisher
       image_transport::ImageTransport it(pnh_);
       imgPub_ = it.advertise(GetSimTreePath(simNode_) + "/image", 1);
-
+      depthmapPub_ = it.advertise(GetSimTreePath(simNode_) + "/depth", 1);
+      opticFlowPub_ = it.advertise(GetSimTreePath(simNode_) + "/optical_flow", 1);
+      objSegmentPub_ = it.advertise(GetSimTreePath(simNode_) + "/object_segment", 1);
+      categorySegmentPub_ = it.advertise(GetSimTreePath(simNode_) + "/category_segment", 1);
       cameraInfoPub_ = pnh_.advertise<sensor_msgs::CameraInfo>(GetSimTreePath(simNode_) + "/camera_info", 1);
 
       // general rbg camera variables
@@ -23,6 +26,8 @@ namespace RPGQ
       height_ = params.GetInt(RGBCamera::height);
       fov_ = params.GetDouble(RGBCamera::fov);
       depth_scale_ = params.GetDouble(RGBCamera::depth_scale);
+
+      // image post processing
     }
 
     sensor_msgs::CameraInfo RGBCamera::GetCameraInfo(void)
@@ -63,12 +68,53 @@ namespace RPGQ
     }
 
     void RGBCamera::feedImageQueue(const ros::Time & img_timestamp,
-      const cv::Mat & image)
+      std::unordered_map<RGBCameraTypes::PostProcessingID, cv::Mat> & images)
     {
-      sensor_msgs::ImagePtr img_msg = cv_bridge::CvImage(std_msgs::Header(), "bgr8", image).toImageMsg();
-      img_msg->header.stamp = img_timestamp;
-      img_msg->header.frame_id = GetSimTreePath(simNode_) + "/image";
-      imgPub_.publish(img_msg);
+      {
+        cv::Mat rgb_image = images[RGBCameraTypes::RGB];
+        sensor_msgs::ImagePtr img_msg = cv_bridge::CvImage(std_msgs::Header(),
+          "bgr8", rgb_image).toImageMsg();
+        img_msg->header.stamp = img_timestamp;
+        img_msg->header.frame_id = GetSimTreePath(simNode_) + "/image";
+        imgPub_.publish(img_msg);
+      }
+      if (post_processing_[RGBCameraTypes::Depth])
+      {
+        cv::Mat depth_image = images[RGBCameraTypes::Depth];
+        sensor_msgs::ImagePtr depth_img_msg = cv_bridge::CvImage(std_msgs::Header(),
+          "bgr8", depth_image).toImageMsg();
+        depth_img_msg->header.stamp = img_timestamp;
+        depth_img_msg->header.frame_id = GetSimTreePath(simNode_) + "/depth";
+        depthmapPub_.publish(depth_img_msg);
+      }
+      if (post_processing_[RGBCameraTypes::OpticalFlow])
+      {
+        cv::Mat opticalflow_image = images[RGBCameraTypes::OpticalFlow];
+        sensor_msgs::ImagePtr opticalflow_img_msg = cv_bridge::CvImage(std_msgs::Header(),
+          "bgr8", opticalflow_image).toImageMsg();
+        opticalflow_img_msg->header.stamp = img_timestamp;
+        opticalflow_img_msg->header.frame_id = GetSimTreePath(simNode_) + "/optical_flow";
+        opticFlowPub_.publish(opticalflow_img_msg);
+      }
+      if (post_processing_[RGBCameraTypes::ObjectSegment])
+      {
+        cv::Mat objseg_image = images[RGBCameraTypes::ObjectSegment];
+        sensor_msgs::ImagePtr objseg_img_msg = cv_bridge::CvImage(std_msgs::Header(),
+          "bgr8", objseg_image).toImageMsg();
+        objseg_img_msg->header.stamp = img_timestamp;
+        objseg_img_msg->header.frame_id = GetSimTreePath(simNode_) + "/object_segment";
+        objSegmentPub_.publish(objseg_img_msg);
+      }
+      if (post_processing_[RGBCameraTypes::CategorySegment])
+      {
+        cv::Mat catseg_image = images[RGBCameraTypes::CategorySegment];
+        sensor_msgs::ImagePtr catseg_img_msg = cv_bridge::CvImage(std_msgs::Header(),
+          "bgr8", catseg_image).toImageMsg();
+        catseg_img_msg->header.stamp = img_timestamp;
+        catseg_img_msg->header.frame_id = GetSimTreePath(simNode_) + "/category_segment";
+        categorySegmentPub_.publish(catseg_img_msg);
+      }
+
     }
 
   } // namespace Simulator

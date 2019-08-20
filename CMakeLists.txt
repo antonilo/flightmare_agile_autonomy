@@ -3,4 +3,141 @@ project(rpg_flightmare)
 
 set(CMAKE_CXX_STANDARD 14)
 
-include_directories(.)
+include_directories(examples/example_control/include)
+include_directories(examples/example_control/include/trajectory)
+include_directories(rpgq_command_bridge/include)
+include_directories(rpgq_command_bridge/include/rpgq_command_bridge)
+include_directories(rpgq_common/include)
+include_directories(rpgq_common/include/rpgq_common)
+include_directories(rpgq_common/include/rpgq_common/circular_buffer)
+include_directories(rpgq_common/include/rpgq_common/msgs)
+include_directories(rpgq_common/include/rpgq_common/network)
+include_directories(rpgq_common/include/rpgq_common/opengl)
+include_directories(rpgq_common/include/rpgq_common/parameters)
+include_directories(rpgq_common/include/rpgq_common/serial_port)
+include_directories(rpgq_common/include/rpgq_common/time)
+include_directories(rpgq_common/include/rpgq_common/types)
+include_directories(rpgq_components/include)
+include_directories(rpgq_components/include/rpgq_components)
+include_directories(rpgq_components/include/rpgq_components/controller)
+include_directories(rpgq_components/include/rpgq_components/estimator)
+include_directories(rpgq_components/include/rpgq_components/onboard)
+include_directories(rpgq_simulator/include)
+include_directories(rpgq_simulator/include/rpgq_simulator)
+include_directories(rpgq_simulator/include/rpgq_simulator/framework)
+include_directories(rpgq_simulator/include/rpgq_simulator/framework/actuators)
+include_directories(rpgq_simulator/include/rpgq_simulator/framework/dynamics)
+include_directories(rpgq_simulator/include/rpgq_simulator/framework/objects)
+include_directories(rpgq_simulator/include/rpgq_simulator/framework/onboard_code)
+include_directories(rpgq_simulator/include/rpgq_simulator/framework/sensors)
+include_directories(rpgq_simulator/include/rpgq_simulator/framework/unity)
+include_directories(rpgq_simulator/include/rpgq_simulator/implementation)
+include_directories(rpgq_simulator/include/rpgq_simulator/implementation/actuators)
+include_directories(rpgq_simulator/include/rpgq_simulator/implementation/objects)
+include_directories(rpgq_simulator/include/rpgq_simulator/implementation/objects/quadrotor_vehicle)
+include_directories(rpgq_simulator/include/rpgq_simulator/implementation/objects/soccer_ball)
+include_directories(rpgq_simulator/include/rpgq_simulator/implementation/sensors)
+include_directories(rpgq_simulator/include/rpgq_simulator/implementation/sensors/event_camera)
+include_directories(rpgq_simulator/include/rpgq_simulator/implementation/unity)
+include_directories(rpgq_simulator/include/rpgq_simulator/tools)
+include_directories(rpgq_simulator/include/rpgq_simulator/visualization)
+include_directories(rpgq_simulator/libraries/glad/include)
+include_directories(rpgq_simulator/libraries/glad/include/glad)
+include_directories(rpgq_simulator/libraries/glad/include/KHR)
+
+add_executable(rpg_flightmare
+        examples/example_control/include/trajectory/trajectory.h
+        examples/example_control/src/trajectory/trajectory.cpp
+        examples/example_control/src/multi_agent.cpp
+        examples/example_control/src/single_agent.cpp
+        examples/example_control/src/single_stereo_agent.cpp
+        rpgq_command_bridge/include/rpgq_command_bridge/rpgq_command_bridge.h
+        rpgq_command_bridge/src/rpgq_command_bridge.cpp
+        rpgq_command_bridge/src/rpgq_command_bridge_node.cpp
+        rpgq_common/include/rpgq_common/circular_buffer/circular_buffer.h
+        rpgq_common/include/rpgq_common/circular_buffer/circular_buffer_timestamped.h
+        rpgq_common/include/rpgq_common/msgs/command_msg_helper.h
+        rpgq_common/include/rpgq_common/network/cobs.h
+        rpgq_common/include/rpgq_common/network/crc.h
+        rpgq_common/include/rpgq_common/opengl/filesystem.h
+        rpgq_common/include/rpgq_common/opengl/mesh.h
+        rpgq_common/include/rpgq_common/opengl/model.h
+        rpgq_common/include/rpgq_common/opengl/shader.h
+        rpgq_common/include/rpgq_common/parameters/parameters.h
+        rpgq_common/include/rpgq_common/serial_port/serial_port.h
+        rpgq_common/include/rpgq_common/time/base_timer.h
+        rpgq_common/include/rpgq_common/time/ext_timer.h
+        rpgq_common/include/rpgq_common/time/timer.h
+        rpgq_common/include/rpgq_common/types/state_6dof.h
+        rpgq_common/include/rpgq_common/quadrotor_id.h
+        rpgq_common/include/rpgq_common/rpgq.h
+        rpgq_common/src/msgs/command_msg_helper.cpp
+        rpgq_common/src/network/cobs.cpp
+        rpgq_common/src/serial_port/serial_port.cpp
+        rpgq_components/include/rpgq_components/controller/low_level_offboard_controller.h
+        rpgq_components/include/rpgq_components/estimator/optitrack_estimator.h
+        rpgq_components/include/rpgq_components/onboard/onboard_logic.h
+        rpgq_components/include/rpgq_components/onboard/onboard_states.h
+        rpgq_components/include/rpgq_components/onboard/state_machine.h
+        rpgq_components/src/controller/low_level_offboard_controller.cpp
+        rpgq_components/src/estimator/optitrack_estimator.cpp
+        rpgq_components/src/onboard/onboard_logic.cpp
+        rpgq_components/src/onboard/state_machine.cpp
+        rpgq_simulator/include/rpgq_simulator/framework/actuators/base_actuator.h
+        rpgq_simulator/include/rpgq_simulator/framework/dynamics/base_dynamics.h
+        rpgq_simulator/include/rpgq_simulator/framework/objects/base_object.h
+        rpgq_simulator/include/rpgq_simulator/framework/objects/composite_object.h
+        rpgq_simulator/include/rpgq_simulator/framework/objects/directly_controlled_object.h
+        rpgq_simulator/include/rpgq_simulator/framework/objects/indirectly_controlled_object.h
+        rpgq_simulator/include/rpgq_simulator/framework/objects/physical_object.h
+        rpgq_simulator/include/rpgq_simulator/framework/onboard_code/base_onboard_code.h
+        rpgq_simulator/include/rpgq_simulator/framework/sensors/base_sensor.h
+        rpgq_simulator/include/rpgq_simulator/framework/unity/unity_object.h
+        rpgq_simulator/include/rpgq_simulator/implementation/actuators/motor.h
+        rpgq_simulator/include/rpgq_simulator/implementation/objects/quadrotor_vehicle/quad_and_event_camera.h
+        rpgq_simulator/include/rpgq_simulator/implementation/objects/quadrotor_vehicle/quad_and_rgb_camera.h
+        rpgq_simulator/include/rpgq_simulator/implementation/objects/quadrotor_vehicle/quad_and_stereo_event_camera.h
+        rpgq_simulator/include/rpgq_simulator/implementation/objects/quadrotor_vehicle/quad_and_stereo_rgb_camera.h
+        rpgq_simulator/include/rpgq_simulator/implementation/objects/quadrotor_vehicle/quadrotor_dynamics.h
+        rpgq_simulator/include/rpgq_simulator/implementation/objects/quadrotor_vehicle/quadrotor_onboard_code.h
+        rpgq_simulator/include/rpgq_simulator/implementation/objects/quadrotor_vehicle/quadrotor_vehicle.h
+        rpgq_simulator/include/rpgq_simulator/implementation/objects/soccer_ball/soccer_ball.h
+        rpgq_simulator/include/rpgq_simulator/implementation/objects/soccer_ball/soccer_ball_dynamics.h
+        rpgq_simulator/include/rpgq_simulator/implementation/sensors/event_camera/event_camera_types.h
+        rpgq_simulator/include/rpgq_simulator/implementation/sensors/event_camera/renderer.h
+        rpgq_simulator/include/rpgq_simulator/implementation/sensors/event_camera.h
+        rpgq_simulator/include/rpgq_simulator/implementation/sensors/imu.h
+        rpgq_simulator/include/rpgq_simulator/implementation/sensors/optitrack.h
+        rpgq_simulator/include/rpgq_simulator/implementation/sensors/rgb_camera.h
+        rpgq_simulator/include/rpgq_simulator/implementation/unity/unity_gate.h
+        rpgq_simulator/include/rpgq_simulator/tools/json.hpp
+        rpgq_simulator/include/rpgq_simulator/visualization/flightmare_bridge.hpp
+        rpgq_simulator/include/rpgq_simulator/visualization/flightmare_message_types.hpp
+        rpgq_simulator/include/rpgq_simulator/visualization/visualizer.h
+        rpgq_simulator/include/rpgq_simulator/simulator.h
+        rpgq_simulator/include/rpgq_simulator/simulator_types.h
+        rpgq_simulator/libraries/glad/include/glad/glad.h
+        rpgq_simulator/libraries/glad/include/KHR/khrplatform.h
+        rpgq_simulator/libraries/glad/src/glad.c
+        rpgq_simulator/src/framework/objects/composite_object.cpp
+        rpgq_simulator/src/framework/objects/directly_controlled_object.cpp
+        rpgq_simulator/src/framework/objects/indirectly_controlled_object.cpp
+        rpgq_simulator/src/implementation/actuators/motor.cpp
+        rpgq_simulator/src/implementation/objects/quadrotor_vehicle/quad_and_event_camera.cpp
+        rpgq_simulator/src/implementation/objects/quadrotor_vehicle/quad_and_rgb_camera.cpp
+        rpgq_simulator/src/implementation/objects/quadrotor_vehicle/quad_and_stereo_event_camera.cpp
+        rpgq_simulator/src/implementation/objects/quadrotor_vehicle/quad_and_stereo_rgb_camera.cpp
+        rpgq_simulator/src/implementation/objects/quadrotor_vehicle/quadrotor_dynamics.cpp
+        rpgq_simulator/src/implementation/objects/quadrotor_vehicle/quadrotor_onboard_code.cpp
+        rpgq_simulator/src/implementation/objects/quadrotor_vehicle/quadrotor_vehicle.cpp
+        rpgq_simulator/src/implementation/objects/soccer_ball/soccer_ball.cpp
+        rpgq_simulator/src/implementation/objects/soccer_ball/soccer_ball_dynamics.cpp
+        rpgq_simulator/src/implementation/sensors/event_camera/renderer.cpp
+        rpgq_simulator/src/implementation/sensors/event_camera.cpp
+        rpgq_simulator/src/implementation/sensors/imu.cpp
+        rpgq_simulator/src/implementation/sensors/optitrack.cpp
+        rpgq_simulator/src/implementation/sensors/rgb_camera.cpp
+        rpgq_simulator/src/implementation/unity/unity_gate.cpp
+        rpgq_simulator/src/visualization/flightmare_bridge.cpp
+        rpgq_simulator/src/visualization/visualizer.cpp
+        rpgq_simulator/src/simulator.cpp)

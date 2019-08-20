@@ -15,6 +15,7 @@
 #include <random>
 #include <mutex>
 #include <deque>
+#include <unordered_map>
 
 // others
 #include <opencv2/core.hpp>
@@ -41,6 +42,13 @@ namespace RPGQ
       typedef std::function<Eigen::Vector3d()> GetOmega_t;
       typedef std::function<Eigen::Vector3d()> GetPsi_t;
 
+      const std::string RGB = "rgb";
+      // image post processing
+      typedef std::string PostProcessingID;
+      const PostProcessingID Depth = "depth";
+      const PostProcessingID OpticalFlow = "optical_flow";
+      const PostProcessingID ObjectSegment = "object_segment"; // object segmentation
+      const PostProcessingID CategorySegment = "category_segment"; // category segmentation
     }
     // standard camera
     class RGBCamera : public BaseSensor
@@ -82,8 +90,8 @@ namespace RPGQ
         T_BC_.row(3) << 0.0, 0.0, 0.0, 1.0;
       };
 
-      void feedImageQueue(const ros::Time & img_timestamp, const cv::Mat & image);
-
+      void feedImageQueue(const ros::Time & img_timestamp,
+        std::unordered_map<RGBCameraTypes::PostProcessingID, cv::Mat> & images);
       // public get functions
       RGBCameraTypes::Mat4_t GetRelPose(void) {return T_BC_;};
 
@@ -92,14 +100,65 @@ namespace RPGQ
       int GetHeight(void) { return height_; };
       double GetFov(void) {return fov_; };
       double GetDepthScale(void) { return depth_scale_; };
+      std::vector<std::string> GetPostProcessing(void){
+        std::vector<std::string> post_processing;
+        for (const auto & pp : post_processing_){
+          if (pp.second){
+            post_processing.push_back(pp.first);
+          }
+        }
+        return post_processing;
+      };
 
       sensor_msgs::CameraInfo GetCameraInfo(void);
 
-      void SetChanel(int channels) { channels_ = channels;};
-      void SetWidth(int width) {width_ = width; };
-      void SetHeight(int height) {height_ = height; };
-      void SetFov(double fov) {fov_ = fov; };
-      void SetDepthScale(double depth_scale) {depth_scale_ = depth_scale;};
+      void SetChanel(const int & channels) { channels_ = channels;};
+      void SetWidth(const int & width) {width_ = width; };
+      void SetHeight(const int & height) {height_ = height; };
+      void SetFov(const double & fov) {fov_ = fov; };
+      void SetDepthScale(const double & depth_scale)
+          {depth_scale_ = depth_scale;};
+      void SetPostProcessing(const std::vector<std::string> & post_processing){
+        for (const auto & pp : post_processing){
+          if (pp=="depth")
+            post_processing_[RGBCameraTypes::Depth] = true;
+          if (pp=="optical_flow")
+            post_processing_[RGBCameraTypes::OpticalFlow] = true;
+          if (pp=="object_segment")
+            post_processing_[RGBCameraTypes::ObjectSegment] = true;
+          if (pp=="category_segment")
+            post_processing_[RGBCameraTypes::CategorySegment] = true;
+        }
+      };
+      void EnableDepth(const bool & on){
+        if (on) {
+          post_processing_[RGBCameraTypes::Depth] = true;
+        } else {
+          post_processing_[RGBCameraTypes::Depth] = false;
+        }
+      };
+      void EnableOpticalFlow(const bool & on){
+        if (on){
+          post_processing_[RGBCameraTypes::OpticalFlow] = true;
+        } else {
+          post_processing_[RGBCameraTypes::OpticalFlow] = false;
+        }
+      };
+      void EnableObjectSegment(const bool & on){
+        if (on){
+          post_processing_[RGBCameraTypes::ObjectSegment] = true;
+        } else {
+          post_processing_[RGBCameraTypes::ObjectSegment] = false;
+        }
+      };
+      void EnableCategorySegment(const bool & on){
+        if (on){
+          post_processing_[RGBCameraTypes::CategorySegment] = true;
+        } else {
+          post_processing_[RGBCameraTypes::CategorySegment] = false;
+        }
+      };
+
 
      private:
       // simulate sensor
@@ -110,6 +169,8 @@ namespace RPGQ
       image_transport::Publisher imgPub_;
       image_transport::Publisher depthmapPub_;
       image_transport::Publisher opticFlowPub_;
+      image_transport::Publisher objSegmentPub_;
+      image_transport::Publisher categorySegmentPub_;
       ros::Publisher cameraInfoPub_;
 
       Eigen::Vector3d B_r_BC_;
@@ -131,6 +192,12 @@ namespace RPGQ
       int height_;
       double fov_;
       double depth_scale_;
+      std::unordered_map<RGBCameraTypes::PostProcessingID, bool> post_processing_= {
+        {RGBCameraTypes::Depth, false},
+        {RGBCameraTypes::OpticalFlow, false},
+        {RGBCameraTypes::ObjectSegment, false},
+        {RGBCameraTypes::CategorySegment, false}
+      };
 
       //
       std::mutex image_queue_mutex_;

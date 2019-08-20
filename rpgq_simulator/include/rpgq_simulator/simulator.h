@@ -71,11 +71,8 @@ namespace RPGQ
         private:
             // general rpgq_simulator variables
             std::unordered_map<ObjectID, std::shared_ptr<BaseObject>> objects_;
-            std::vector<std::shared_ptr<UnityObject>> unity_objects_;
-            std::vector<std::shared_ptr<QuadrotorVehicle>> unity_vehicles_;
 
-
-          ros::NodeHandle nh_, pnh_;
+            ros::NodeHandle nh_, pnh_;
 
             // simulation timing variables
             std::shared_ptr<ExtTimer> timer_;
