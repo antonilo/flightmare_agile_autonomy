@@ -48,9 +48,9 @@ include_directories(rpgq_simulator/libraries/glad/include/KHR)
 add_executable(rpg_flightmare
         examples/example_control/include/trajectory/trajectory.h
         examples/example_control/src/trajectory/trajectory.cpp
-        examples/example_control/src/multi_agent.cpp
-        examples/example_control/src/single_agent.cpp
-        examples/example_control/src/single_stereo_agent.cpp
+        examples/example_control/src/multi_vehicle.cpp
+        examples/example_control/src/single_vehicle.cpp
+        examples/example_vision/src/single_stereo_camera.cpp
         rpgq_command_bridge/include/rpgq_command_bridge/rpgq_command_bridge.h
         rpgq_command_bridge/src/rpgq_command_bridge.cpp
         rpgq_command_bridge/src/rpgq_command_bridge_node.cpp

@@ -9,8 +9,6 @@ namespace RPGQ
 {
   namespace Simulator
   {
-    class IMU;
-
     class QuadStereoRGBCamera : public CompositeObject
     {
      public:
@@ -41,7 +39,6 @@ namespace RPGQ
       // auxiliary variables
       std::shared_ptr<QuadrotorVehicle> quadPtr_;
       std::shared_ptr<RGBCamera> leftRGBCameraPtr_, rightRGBCameraPtr_;
-      std::shared_ptr<IMU> leftImuPtr_, rightImuPtr_;
     };
   } //  namespace Simulator
 } // namespace RPGQ

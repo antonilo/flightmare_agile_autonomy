@@ -13,21 +13,42 @@ file(GLOB_RECURSE PROJECT_SOURCE
 )
 
 # make the executable
-cs_add_executable(single_agent src/single_agent.cpp src/trajectory/trajectory.cpp)
-cs_add_executable(single_stereo_agent src/single_stereo_agent.cpp src/trajectory/trajectory.cpp)
-cs_add_executable(multi_agent src/multi_agent.cpp src/trajectory/trajectory.cpp)
+cs_add_executable(single_vehicle src/single_vehicle.cpp src/trajectory/trajectory.cpp)
+cs_add_executable(multi_vehicle src/multi_vehicle.cpp src/trajectory/trajectory.cpp)
+cs_add_executable(single_vehicle_and_rgb_camera src/single_vehicle_and_rgb_camera.cpp src/trajectory/trajectory.cpp)
+cs_add_executable(single_vehicle_and_stereo_camera src/single_vehicle_and_stereo_camera.cpp src/trajectory/trajectory.cpp)
+cs_add_executable(multi_vehicle_and_rgb_camera src/multi_vehicle_and_rgb_camera.cpp src/trajectory/trajectory.cpp)
+
 # link the executable to the necessary libraries
-target_link_libraries(single_agent
+target_link_libraries(single_vehicle
         ${catkin_LIBRARIES}
         zmq
         zmqpp
 )
 
 # link the executable to the necessary libraries
-target_link_libraries(multi_agent
+target_link_libraries(multi_vehicle
   ${catkin_LIBRARIES}
   zmq
   zmqpp
 )
+# link the executable to the necessary libraries
+target_link_libraries(single_vehicle_and_rgb_camera
+        ${catkin_LIBRARIES}
+        zmq
+        zmqpp
+        )
+# link the executable to the necessary libraries
+target_link_libraries(single_vehicle_and_stereo_camera
+        ${catkin_LIBRARIES}
+        zmq
+        zmqpp
+        )
+# link the executable to the necessary libraries
+target_link_libraries(multi_vehicle_and_rgb_camera
+        ${catkin_LIBRARIES}
+        zmq
+        zmqpp
+        )
 
 cs_install()

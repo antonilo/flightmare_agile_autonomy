@@ -37,23 +37,6 @@ namespace RPGQ
               0.0, 0.0, 1.0;
       rgbCameraPtr_->SetRelPose(B_r_BC, R_BC);
       AddSensor(rgbCameraPtr_);
-
-      /* ------------------- */
-      //  add IMU sensor
-      //  and set up relative pose
-      /* ------------------- */
-      // default 1kHz -> simulate every 1000us
-      imuPtr_ = std::make_shared<IMU>(ID::Sensor::IMU, rgbCameraPtr_->GetSimNode());
-      imuPtr_->SetCallbackFunctions(std::bind(&QuadrotorDynamics::GetAcc, quadPtr_->GetDynamics()),
-                                    std::bind(&QuadrotorDynamics::GetQuat, quadPtr_->GetDynamics()),
-                                    std::bind(&QuadrotorDynamics::GetOmega, quadPtr_->GetDynamics()),
-                                    std::bind(&QuadrotorDynamics::GetPsi, quadPtr_->GetDynamics()));
-
-      RGBCameraTypes::Mat4_t T_BC = rgbCameraPtr_->GetRelPose();
-      Eigen::Vector3d B_r_BS = T_BC.block<3, 1>(0, 3);
-      Eigen::Matrix3d R_SB = (T_BC.block<3, 3>(0, 0)).transpose();
-      imuPtr_->SetRelPose(B_r_BS, R_SB);
-      AddSensor(imuPtr_);
     }
 
     // add objects

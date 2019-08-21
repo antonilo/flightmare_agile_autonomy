@@ -18,9 +18,9 @@ Trajectory::Trajectory(std::shared_ptr<RPGQ::Timer> timer)
     yawStart_ = 0.0;
 
     // figure 8
-    fig8R_ = 4.0;
+    fig8R_ = 6.0;
     fig8Omega_ = 1.5;
-    fig8Dist_ = 5.0;
+    fig8Dist_ = 10.0;
     fig8SplineAngle_ = 120.0/180.0*M_PI;
 
     double x0 = fig8R_*cos(fig8SplineAngle_ / 2.0) - fig8Dist_ / 2.0;

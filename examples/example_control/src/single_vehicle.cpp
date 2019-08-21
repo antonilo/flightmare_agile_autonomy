@@ -23,8 +23,7 @@ int main(int argc, char * argv[]) {
   ros::NodeHandle nh("");
   ros::NodeHandle pnh("~");
 
-  // get parameters
-  std::string quadName = "leonardo";
+  // define the scene name
   std::string sceneName;
   if (!pnh.getParam("scene_name", sceneName))
   {
@@ -32,42 +31,31 @@ int main(int argc, char * argv[]) {
     return -1;
   }
 
-  QuadrotorID quadID = QuadrotorNameToID(quadName);
+  // quad ID can be any real number between
+  // 0 ~ 25, each ID corresponding to a unique
+  // quad name
+  QuadrotorID quadID = 1;
+  std::string quadName = QuadrotorName(quadID);
 
   // create simulator
   std::shared_ptr<Simulator::Simulator> sim = std::make_shared<Simulator::Simulator>();
-
-  // create a quadrotor with a RGB Camera on it.
-  std::shared_ptr<Simulator::QuadRGBCamera> quadRGB =
-    std::make_shared<Simulator::QuadRGBCamera>(quadName, nullptr, 1000000);
-  //
-  std::shared_ptr<Simulator::QuadrotorVehicle> quad = quadRGB->GetQuad();
-  quad->SetPos(Eigen::Vector3d(0.0, 0.0, 2.0));
-  quad->SetQuat(Eigen::Quaterniond(std::cos(0.5*M_PI_2),0.0,0.0,std::sin(0.5*M_PI_2)));
-  quad->SetSize(Eigen::Vector3d(0.1, 0.1, 0.1));
-  //
-  std::shared_ptr<Simulator::RGBCamera> rgb = quadRGB->GetRGBCamera();
-  rgb->EnableDepth(true);
-  rgb->EnableOpticalFlow(true);
-  rgb->EnableObjectSegment(true);
-  rgb->EnableCategorySegment(true);
-  //
-  sim->AddObjectToOptitrack(quad);
-  //
+  // enable flightmare for visualization
   sim->SetFlightmare(true);
 
-  // add gate to the simulator
-  std::string gate_name = "gate01";
-  std::string gate_prefab_name = "rpg_gate";
-  std::shared_ptr<Simulator::UnityGate>
-    gate01 = std::make_shared<Simulator::UnityGate>(gate_name, gate_prefab_name);
-  gate01->SetPosition(Eigen::Vector3d(0.0, 0.0, 2.4));
-  gate01->SetRotation(Eigen::Quaterniond(1.0, 0.0, 0.0, 0.0));
-  gate01->SetSize(Eigen::Vector3d(1.0, 1.0, 1.0));
+  // create a quadrotor with a RGB Camera on it.
+  std::shared_ptr<Simulator::QuadrotorVehicle> quad =
+    std::make_shared<Simulator::QuadrotorVehicle>(quadName, nullptr, 1000000);
+  quad->SetPos(Eigen::Vector3d(0.0, 0.0, 8.0));
+  quad->SetQuat(Eigen::Quaterniond(std::cos(0.5*M_PI_2),0.0,0.0,std::sin(0.5*M_PI_2)));
+  quad->SetSize(Eigen::Vector3d(0.3, 0.3, 0.3));
 
-  // add objects to unity for simulation and visulization.
-  sim->AddObjectToUnity(gate01);
-  sim->AddObjectToUnity(quadRGB);
+  // add quad to simulated optitrack for
+  // pose estimation of the quadrotor
+  sim->AddObjectToOptitrack(quad);
+
+  // add quadrotor to Unity standalone
+  // for visulization
+  sim->AddObjectToUnity(quad);
 
   // set up multi-purpose timer
   std::shared_ptr<ExtTimer> timer;
@@ -75,9 +63,9 @@ int main(int argc, char * argv[]) {
 
   // set up estimator
   OptitrackEstimator est(quadID);
-  //
+
+  // set up pose subscriber
   ros::Subscriber poseSub;
-  //
   poseSub = nh.subscribe("/rpgq_simulator/optitrack/" + quadName, 10, &OptitrackEstimator::MeasurementUpdate, &est);
 
   // set up controller
@@ -86,6 +74,7 @@ int main(int argc, char * argv[]) {
   ctrl.SetPosDes(Eigen::Vector3d(0.0, 0.0, 2.0));
   ctrl.SetYawDes(0.0);
 
+  // set up figure8 trajectory
   bool fig8Started = false;
   Trajectory trajectory(sim->GetSimTimer());
   trajectory.SetStartPose(Eigen::Vector3d(0.0, 0.0, 2.0), 0.0);
@@ -143,6 +132,8 @@ int main(int argc, char * argv[]) {
     // feed estimator with commands
     est.FeedCommandQueue(cmdSet);
     sim->SetCommandSet(cmdSet);
+
+    // run simulation
     sim->Run(1.0/CONTROL_UPDATE_RATE);
 
     // stop measuring time, sleep accordingly

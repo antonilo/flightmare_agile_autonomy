@@ -23,8 +23,7 @@ int main(int argc, char * argv[]) {
   ros::NodeHandle nh("");
   ros::NodeHandle pnh("~");
 
-  // get parameters
-  std::string quadName = "leonardo";
+  // define the scene name
   std::string sceneName;
   if (!pnh.getParam("scene_name", sceneName))
   {
@@ -32,34 +31,64 @@ int main(int argc, char * argv[]) {
     return -1;
   }
 
-  QuadrotorID quadID = QuadrotorNameToID(quadName);
+  // quad ID can be any real number between
+  // 0 ~ 25, each ID corresponding to a unique
+  // quad name
+  QuadrotorID quadID = 0;
+  std::string quadName = QuadrotorName(quadID);
 
   // create simulator
   std::shared_ptr<Simulator::Simulator> sim = std::make_shared<Simulator::Simulator>();
-
-  // create a quadrotor with a RGB Camera on it.
-  std::shared_ptr<Simulator::QuadStereoRGBCamera> quadStereoRGB = std::make_shared<Simulator::QuadStereoRGBCamera>(quadName, nullptr, 1000000);
-  std::shared_ptr<Simulator::QuadrotorVehicle> quad = quadStereoRGB->GetQuad();
-  quad->SetPos(Eigen::Vector3d(0.0, 0.0, 2.0));
-  quad->SetQuat(Eigen::Quaterniond(std::cos(0.5*M_PI_2),0.0,0.0,std::sin(0.5*M_PI_2)));
-  quad->SetSize(Eigen::Vector3d(0.1, 0.1, 0.1));
-  //
-  sim->AddObjectToOptitrack(quad);
   //
   sim->SetFlightmare(true);
 
-  // add gate to the simulator
-  std::string gate_name = "gate01";
-  std::string gate_prefab_name = "rpg_gate";
-  std::shared_ptr<Simulator::UnityGate>
-    gate01 = std::make_shared<Simulator::UnityGate>(gate_name, gate_prefab_name);
-  gate01->SetPosition(Eigen::Vector3d(0.0, 0.0, 2.4));
-  gate01->SetRotation(Eigen::Quaterniond(1.0, 0.0, 0.0, 0.0));
-  gate01->SetSize(Eigen::Vector3d(1.0, 1.0, 1.0));
-
-  // add objects to unity for simulation and visulization.
-  sim->AddObjectToUnity(gate01);
+  // create a quadrotor with a RGB Camera on it.
+  std::shared_ptr<Simulator::QuadStereoRGBCamera> quadStereoRGB =
+    std::make_shared<Simulator::QuadStereoRGBCamera>(quadName, nullptr, 1000000);
+  //
+  Eigen::Vector3d init_position{0.0, 0.0, 5.0};
+  std::shared_ptr<Simulator::QuadrotorVehicle> quad = quadStereoRGB->GetQuad();
+  quad->SetPos(init_position);
+  quad->SetQuat(Eigen::Quaterniond(std::cos(0.5*M_PI_2),0.0,0.0,std::sin(0.5*M_PI_2)));
+  quad->SetSize(Eigen::Vector3d(0.5, 0.5, 0.5));
+  //
+  std::shared_ptr<Simulator::RGBCamera> left_rgb = quadStereoRGB->GetLeftRGBCamera();
+  left_rgb->EnableOpticalFlow(false);// TODO: the color encoding of optical flow is not right
+  left_rgb->EnableDepth(false);
+  left_rgb->EnableObjectSegment(false);
+  left_rgb->EnableCategorySegment(false);
+//  left_rgb->SetWidth(320);
+//  left_rgb->SetHeight(240);
+  std::shared_ptr<Simulator::RGBCamera> right_rgb = quadStereoRGB->GetRightRGBCamera();
+  right_rgb->EnableOpticalFlow(false);// TODO: the color encoding of optical flow is not right
+  right_rgb->EnableDepth(false);
+  right_rgb->EnableObjectSegment(false);
+  right_rgb->EnableCategorySegment(false);
+//  right_rgb->SetWidth(320);
+//  right_rgb->SetHeight(240);
+  //
+  sim->AddObjectToOptitrack(quad);
   sim->AddObjectToUnity(quadStereoRGB);
+
+  // add gate to the simulator
+  std::string gate_prefab_name = "rpg_gate";
+  // define center position of multiple agents
+  int n_x = 10;
+  int n_y = 10;
+  Eigen::ArrayXd center_x = Eigen::ArrayXd::LinSpaced(n_x, -20, 20);
+  Eigen::ArrayXd center_y = Eigen::ArrayXd::LinSpaced(n_y, -30, 30);
+  for (size_t i=0; i< n_x; i++)
+  {
+    for (size_t j=0; j< n_y; j++)
+    {
+      std::string gate_name = "gate_"+std::to_string(i)+"_"+std::to_string(j);
+      std::shared_ptr<Simulator::UnityGate> gate_i =
+        std::make_shared<Simulator::UnityGate>(gate_name, gate_prefab_name);
+      gate_i->SetPosition(Eigen::Vector3d(center_x(i), center_x(j), 2.4));
+      // add objects to unity for simulation and visulization.
+      sim->AddObjectToUnity(gate_i);
+    }
+  }
 
   // set up multi-purpose timer
   std::shared_ptr<ExtTimer> timer;
@@ -75,12 +104,12 @@ int main(int argc, char * argv[]) {
   // set up controller
   LowLevelOffboardController ctrl(quadID, timer);
   ctrl.SetCommandLevel(LowLevelOffboardController::CommandLevel::POS_CMD);
-  ctrl.SetPosDes(Eigen::Vector3d(0.0, 0.0, 2.0));
+  ctrl.SetPosDes(init_position);
   ctrl.SetYawDes(0.0);
 
   bool fig8Started = false;
   Trajectory trajectory(sim->GetSimTimer());
-  trajectory.SetStartPose(Eigen::Vector3d(0.0, 0.0, 2.0), 0.0);
+  trajectory.SetStartPose(init_position, 0.0);
 
   // main loop
   Timer loopTimer;
@@ -135,6 +164,8 @@ int main(int argc, char * argv[]) {
     // feed estimator with commands
     est.FeedCommandQueue(cmdSet);
     sim->SetCommandSet(cmdSet);
+
+    // run simulation
     sim->Run(1.0/CONTROL_UPDATE_RATE);
 
     // stop measuring time, sleep accordingly

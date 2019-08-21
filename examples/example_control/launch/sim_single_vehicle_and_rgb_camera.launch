@@ -1,0 +1,23 @@
+
+<launch>
+    <arg name="debug" default="0" />
+    <arg name="editor" default="1" />
+    <arg name="scene_name" default="Warehouse/Scenes/DemoScene"/>
+
+    <param name="use_sim_time" value="true"/>
+
+    <node name="rpgg_flightmare_Renderer" pkg="rpgq_simulator" type="RPG_FLIGHTMARE.x86_64" unless="$(arg editor)"/>
+
+    <node name="simulator" pkg="example_control" type="single_vehicle_and_rgb_camera" output="screen" launch-prefix="gdb -ex run --args" if="$(arg debug)" >
+        <param name="scene_name" value="$(arg scene_name)" />
+    </node>
+    <node name="simulator" pkg="example_control" type="single_vehicle_and_rgb_camera" output="screen" unless="$(arg debug)">
+        <param name="scene_name" value="$(arg scene_name)" />
+    </node>
+
+    <node type="rviz" name="rviz" pkg="rviz" args="-d $(find example_control)/rviz/single_vehicle_with_rgb_camera.rviz" />
+
+
+
+
+</launch>

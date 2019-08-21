@@ -25,31 +25,50 @@ namespace RPGQ
 {
   namespace Simulator
   {
-    namespace RGBCameraTypes
-    {
-      typedef float Intensity_t;
-      typedef cv::Mat_<Intensity_t> Image_t;
-      typedef cv::Mat_<Intensity_t> Depthmap_t;
-      typedef cv::Mat_<cv::Vec<Intensity_t, 2>> OpticFlow_t;
+      namespace RGBCameraTypes
+      {
+        typedef int8_t Intensity_t;
+        typedef cv::Mat Image_t;
 
-      typedef Eigen::Matrix4d Mat4_t;
-      typedef Eigen::Vector3d Vec3_t;
+        struct RGBImage_t
+        {
+          Image_t image;
+          USecs elapsed_useconds;
+        };
+        struct Depthmap_t
+        {
+          Image_t image;
+          USecs elapsed_useconds;
+        };
+        struct Segement_t
+        {
+          Image_t image;
+          USecs elapsed_useconds;
+        };
+//        typedef cv::Mat_<Intensity_t> Image_t;
+//        typedef cv::Mat_<Intensity_t> Depthmap_t;
+//        typedef cv::Mat_<Intensity_t> Segement_t;
+//        typedef cv::Mat_<cv::Vec<Intensity_t, 2>> OpticFlow_t;
 
-      typedef std::function<Eigen::Vector3d()> GetPos_t;
-      typedef std::function<Eigen::Vector3d()> GetVel_t;
-      typedef std::function<Eigen::Vector3d()> GetAcc_t;
-      typedef std::function<Eigen::Quaterniond()> GetQuat_t;
-      typedef std::function<Eigen::Vector3d()> GetOmega_t;
-      typedef std::function<Eigen::Vector3d()> GetPsi_t;
+        typedef Eigen::Matrix4d Mat4_t;
+        typedef Eigen::Vector3d Vec3_t;
 
-      const std::string RGB = "rgb";
-      // image post processing
-      typedef std::string PostProcessingID;
-      const PostProcessingID Depth = "depth";
-      const PostProcessingID OpticalFlow = "optical_flow";
-      const PostProcessingID ObjectSegment = "object_segment"; // object segmentation
-      const PostProcessingID CategorySegment = "category_segment"; // category segmentation
+        typedef std::function<Eigen::Vector3d()> GetPos_t;
+        typedef std::function<Eigen::Vector3d()> GetVel_t;
+        typedef std::function<Eigen::Vector3d()> GetAcc_t;
+        typedef std::function<Eigen::Quaterniond()> GetQuat_t;
+        typedef std::function<Eigen::Vector3d()> GetOmega_t;
+        typedef std::function<Eigen::Vector3d()> GetPsi_t;
+
+        const std::string RGB = "rgb";
+        // image post processing
+        typedef std::string PostProcessingID;
+        const PostProcessingID Depth = "depth";
+        const PostProcessingID OpticalFlow = "optical_flow";
+        const PostProcessingID ObjectSegment = "object_segment"; // object segmentation
+        const PostProcessingID CategorySegment = "category_segment"; // category segmentation
     }
+
     // standard camera
     class RGBCamera : public BaseSensor
     {
@@ -90,7 +109,7 @@ namespace RPGQ
         T_BC_.row(3) << 0.0, 0.0, 0.0, 1.0;
       };
 
-      void feedImageQueue(const ros::Time & img_timestamp,
+      void FeedImageQueue(const ros::Time & img_timestamp,
         std::unordered_map<RGBCameraTypes::PostProcessingID, cv::Mat> & images);
       // public get functions
       RGBCameraTypes::Mat4_t GetRelPose(void) {return T_BC_;};
@@ -110,7 +129,7 @@ namespace RPGQ
         return post_processing;
       };
 
-      sensor_msgs::CameraInfo GetCameraInfo(void);
+      sensor_msgs::CameraInfo GetCameraInfo(const USecs & elapsed_useconds);
 
       void SetChanel(const int & channels) { channels_ = channels;};
       void SetWidth(const int & width) {width_ = width; };
@@ -173,6 +192,13 @@ namespace RPGQ
       image_transport::Publisher categorySegmentPub_;
       ros::Publisher cameraInfoPub_;
 
+      // publish functions
+      void PublishImage();
+      void PublishDepthmap();
+//      void PublishOpticFlow(const RGBCameraTypes::OpticFlow_t& optic_flow);
+      void PublishObjSegment();
+      void PublishCatSegment();
+
       Eigen::Vector3d B_r_BC_;
       RGBCameraTypes::Mat4_t T_BC_;
 
@@ -200,8 +226,12 @@ namespace RPGQ
       };
 
       //
-      std::mutex image_queue_mutex_;
-      std::deque<cv::Mat> image_queue_;
+      std::mutex queue_mutex_;
+      std::deque<RGBCameraTypes::RGBImage_t> image_queue_;
+      std::deque<RGBCameraTypes::Depthmap_t>  depth_queue_;
+//      std::deque<RGBCameraTypes::OpticFlow_t> optical_flow_queue_;
+      std::deque<RGBCameraTypes::Segement_t>  obj_seg_queue_;
+      std::deque<RGBCameraTypes::Segement_t>  category_seg_queue_;
 
       // auxiliary variables, mainly for unity setup
       bool is_depth{false};

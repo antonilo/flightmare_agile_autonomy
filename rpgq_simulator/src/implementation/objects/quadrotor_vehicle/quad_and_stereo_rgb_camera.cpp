@@ -23,7 +23,7 @@ namespace RPGQ
                                         std::bind(&QuadrotorDynamics::GetVel, quadPtr_->GetDynamics()),
                                         std::bind(&QuadrotorDynamics::GetQuat, quadPtr_->GetDynamics()),
                                         std::bind(&QuadrotorDynamics::GetOmega, quadPtr_->GetDynamics()));
-        Eigen::Vector3d B_r_BC(-0.10*std::sqrt(2.0)/2.0, 0.10*std::sqrt(2.0)/2.0, 0.0);
+        Eigen::Vector3d B_r_BC(-0.10*std::sqrt(2.0)/2.0, 0.10*std::sqrt(2.0)/2.0, 0.3);
         Eigen::Matrix3d R_BC;
         R_BC << 1.0, 0.0, 0.0,
                 0.0, 1.0, 0.0,
@@ -34,48 +34,18 @@ namespace RPGQ
       // add right rgb camera
       {
         rightRGBCameraPtr_ = std::make_shared<RGBCamera>(ID::Sensor::RGBCamera + "_right",
-                                                        leftRGBCameraPtr_->GetSimNode());
+                                                         quadPtr_->GetSimNode());
         rightRGBCameraPtr_->SetPoseCallbacks(std::bind(&QuadrotorDynamics::GetPos, quadPtr_->GetDynamics()),
                                             std::bind(&QuadrotorDynamics::GetVel, quadPtr_->GetDynamics()),
                                             std::bind(&QuadrotorDynamics::GetQuat, quadPtr_->GetDynamics()),
                                             std::bind(&QuadrotorDynamics::GetOmega, quadPtr_->GetDynamics()));
-        Eigen::Vector3d B_r_BC(0.10*std::sqrt(2.0)/2.0, 0.10*std::sqrt(2.0)/2.0, 0.0);
+        Eigen::Vector3d B_r_BC(0.10*std::sqrt(2.0)/2.0, 0.10*std::sqrt(2.0)/2.0, 0.3);
         Eigen::Matrix3d R_BC;
         R_BC << 1.0, 0.0, 0.0,
                 0.0, 1.0, 0.0,
                 0.0, 0.0, 1.0;
         rightRGBCameraPtr_->SetRelPose(B_r_BC, R_BC);
         AddSensor(rightRGBCameraPtr_);
-      }
-      // add left IMU
-      {
-        // default 1kHz -> simulate every 1000us
-        leftImuPtr_ = std::make_shared<IMU>(ID::Sensor::IMU + "_left", leftRGBCameraPtr_->GetSimNode());
-        leftImuPtr_->SetCallbackFunctions(std::bind(&QuadrotorDynamics::GetAcc, quadPtr_->GetDynamics()),
-                                      std::bind(&QuadrotorDynamics::GetQuat, quadPtr_->GetDynamics()),
-                                      std::bind(&QuadrotorDynamics::GetOmega, quadPtr_->GetDynamics()),
-                                      std::bind(&QuadrotorDynamics::GetPsi, quadPtr_->GetDynamics()));
-
-        RGBCameraTypes::Mat4_t T_BC = leftRGBCameraPtr_->GetRelPose();
-        Eigen::Vector3d B_r_BS = T_BC.block<3, 1>(0, 3);
-        Eigen::Matrix3d R_SB = (T_BC.block<3, 3>(0, 0)).transpose();
-        leftImuPtr_->SetRelPose(B_r_BS, R_SB);
-        AddSensor(leftImuPtr_);
-      }
-      // add right IMU
-      {
-        // default 1kHz -> simulate every 1000us
-        rightImuPtr_ = std::make_shared<IMU>(ID::Sensor::IMU + "_right", rightRGBCameraPtr_->GetSimNode());
-        rightImuPtr_->SetCallbackFunctions(std::bind(&QuadrotorDynamics::GetAcc, quadPtr_->GetDynamics()),
-                                          std::bind(&QuadrotorDynamics::GetQuat, quadPtr_->GetDynamics()),
-                                          std::bind(&QuadrotorDynamics::GetOmega, quadPtr_->GetDynamics()),
-                                          std::bind(&QuadrotorDynamics::GetPsi, quadPtr_->GetDynamics()));
-
-        RGBCameraTypes::Mat4_t T_BC = rightRGBCameraPtr_->GetRelPose();
-        Eigen::Vector3d B_r_BS = T_BC.block<3, 1>(0, 3);
-        Eigen::Matrix3d R_SB = (T_BC.block<3, 3>(0, 0)).transpose();
-        rightImuPtr_->SetRelPose(B_r_BS, R_SB);
-        AddSensor(rightImuPtr_);
       }
     }
 

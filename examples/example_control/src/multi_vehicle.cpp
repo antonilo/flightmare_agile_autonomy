@@ -23,12 +23,12 @@ int main(int argc, char * argv[]) {
   ros::NodeHandle nh("");
   ros::NodeHandle pnh("~");
 
-  std::string sceneName="Warehouse/Scenes/DemoScene";
-//  if (!pnh.getParam("scene_name", sceneName))
-//  {
-//    ROS_ERROR("[%s] Could not determine scene name.", pnh.getNamespace().c_str());
-//    return -1;
-//  }
+  std::string sceneName;
+  if (!pnh.getParam("scene_name", sceneName))
+  {
+    ROS_ERROR("[%s] Could not determine scene name.", pnh.getNamespace().c_str());
+    return -1;
+  }
 
   // create simulator
   std::shared_ptr<Simulator::Simulator> sim = std::make_shared<Simulator::Simulator>();
@@ -40,12 +40,9 @@ int main(int argc, char * argv[]) {
 
   // define center position of multiple agents
   int n_x = 2;
-  int n_y = 1;
-  Eigen::ArrayXd center_x = Eigen::ArrayXd::LinSpaced(n_x, -5, 5);
-  Eigen::ArrayXd center_y = Eigen::ArrayXd::LinSpaced(n_y, -10, 10);
-
-  std::cout << center_x << std::endl;
-  std::cout << center_y << std::endl;
+  int n_y = 2;
+  Eigen::ArrayXd center_x = Eigen::ArrayXd::LinSpaced(n_x, -3, 3);
+  Eigen::ArrayXd center_y = Eigen::ArrayXd::LinSpaced(n_y, -3, 3);
 
   double center_z = 10.0;
 
@@ -62,16 +59,16 @@ int main(int argc, char * argv[]) {
     {
       std::string quadName = QuadrotorName(quadID);
 
-      std::shared_ptr<Simulator::QuadRGBCamera> quadRGB = std::make_shared<Simulator::QuadRGBCamera>(quadName, nullptr, 1000000);
-      std::shared_ptr<Simulator::QuadrotorVehicle> quad = quadRGB->GetQuad();
+      std::shared_ptr<Simulator::QuadrotorVehicle> quad =
+        std::make_shared<Simulator::QuadrotorVehicle>(quadName, nullptr, 1000000);
       quad->SetPos(Eigen::Vector3d(center_x(i), center_y(j), center_z));
       quad->SetQuat(Eigen::Quaterniond(std::cos(0.5 * M_PI_2), 0.0, 0.0, std::sin(0.5 * M_PI_2)));
-      quad->SetSize(Eigen::Vector3d(0.5, 0.5, 0.5));
+      quad->SetSize(Eigen::Vector3d(0.3, 0.3, 0.3));
 
       sim->AddObjectToOptitrack(quad);
 
       // add objects to unity for simulation and visulization.
-      sim->AddObjectToUnity(quadRGB);
+      sim->AddObjectToUnity(quad);
 
       // set up estimator
       OptitrackEstimator *est = new OptitrackEstimator(quadID);
@@ -90,7 +87,6 @@ int main(int argc, char * argv[]) {
       Trajectory traj(sim->GetSimTimer());
       traj.SetStartPose(Eigen::Vector3d(center_x(i), center_y(j), center_z), 0.0);
 
-      std::cout << "quad name: " << quadName << std::endl;
       quad_agents.push_back(quadName);
       estimators.push_back(est);
       pose_subs.push_back(poseSub);
@@ -155,8 +151,6 @@ int main(int argc, char * argv[]) {
     for (int quad_i=0; quad_i<quad_agents.size(); quad_i++) {
       estimators[quad_i]->FeedCommandQueue(cmdSet);
     }
-
-    // std::cout << "legnth" << unsigned( cmdSet.length) << std::endl;
 
     sim->SetCommandSet(cmdSet);
     sim->Run(1.0/CONTROL_UPDATE_RATE);

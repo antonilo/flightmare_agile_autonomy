@@ -285,6 +285,8 @@ namespace RPGQ
           std::string camera_ID = vehicle.ID + "_" + cam.ID;
           std::shared_ptr<RGBCamera> rgb_camera = unity_cameras_[camera_ID];
 
+          std::cout << "camera ID: " << camera_ID << std::endl;
+
           uint32_t imageLen = sub_msg.camWidth * sub_msg.camHeight * sub_msg.channels[camera_i];
           // Get raw image bytes from ZMQ message.
           // WARNING: This is a zero-copy operation that also casts the input to an array of unit8_t.
@@ -307,7 +309,6 @@ namespace RPGQ
           }
           images.emplace("rgb", new_image);
           for (const auto & pp : cam.post_processing){
-            std::cout << "post processing : " << pp << std::endl;
             //
             const uint8_t *pp_imageData;
             msg.get(pp_imageData, image_i);
@@ -328,7 +329,7 @@ namespace RPGQ
             images.emplace(pp, pp_image);
           }
           //
-          rgb_camera->feedImageQueue(image_timestamp, images);
+          rgb_camera->FeedImageQueue(image_timestamp, images);
         }
       }
 //      output.images.resize(sub_msg.cameraIDs.size());
