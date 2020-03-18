@@ -44,12 +44,12 @@ namespace RPGQ
             USecs UpdateSamplingInterval(void) {};
 
             // publishers
-            std::vector<ros::Publisher> pubs_;
-            std::vector<std::deque<geometry_msgs::PoseStamped>> msgDeques_;
+            std::unordered_map<ObjectID, ros::Publisher> pubs_;
+            std::unordered_map<ObjectID, std::deque<geometry_msgs::PoseStamped>> msgDeques_;
 
             // general Optitrack variables
             std::default_random_engine gen_;
-            std::vector<std::shared_ptr<PhysicalObject>> objects_;
+            std::unordered_map<ObjectID, std::shared_ptr<PhysicalObject>> objects_;
             uint32_t frameCounter_;
 
             // sensor parameters

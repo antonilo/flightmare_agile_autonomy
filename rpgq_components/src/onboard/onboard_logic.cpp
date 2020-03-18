@@ -15,19 +15,19 @@ OnboardLogic::OnboardLogic(QuadrotorID quadID, USecs updateInterval):
 
     // angular velocity controller
     Kinv_ang_vel_tau_.setZero();
-    Kinv_ang_vel_tau_(0,0) = 1.0/0.01;
-    Kinv_ang_vel_tau_(1,1) = 1.0/0.01;
-    Kinv_ang_vel_tau_(2,2) = 1.0/0.1;
+    Kinv_ang_vel_tau_(0,0) = 1.0/0.01; // 100
+    Kinv_ang_vel_tau_(1,1) = 1.0/0.01; // 100
+    Kinv_ang_vel_tau_(2,2) = 1.0/0.1;  // 10
 
     // others
-    mass_ = 0.523;
+    mass_ = 0.73;
     J_.setZero();
-    J_(0,0) = 0.0023; J_(1,1) = 0.0023; J_(2,2) = 0.0046;
-    double l = 0.17;
-    double kappa = 0.016;
+    J_(0,0) = 0.007; J_(1,1) = 0.007; J_(2,2) = 0.012;
+    double l = 0.17; // arm length
+    double kappa = 0.016; // rotor drag coefficient
 
     // thrust / torque map parameters
-    cFInv_ = 1.0/6.4127e-6;
+    cFInv_ = 1.0/8.54858e-6;
     fMin_ = 0.15; // make sure motors can actually spin slow/fast enough
     fMax_ = 3.5;
 
@@ -130,7 +130,6 @@ void OnboardLogic::RunFlightCtrl(Eigen::Vector3d &omega)
     rotThrustCmd_(2)= CONSTRAIN(rotThrustCmd_(2), fMin_, fMax_);
     rotThrustCmd_(3)= CONSTRAIN(rotThrustCmd_(3), fMin_, fMax_);
     rotOmegaCmd_ = (rotThrustCmd_*cFInv_).array().sqrt();
-    
 }
 
 

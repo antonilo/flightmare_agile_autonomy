@@ -6,7 +6,7 @@
 
     <param name="use_sim_time" value="true"/>
 
-    <node name="rpgg_flightmare_Renderer" pkg="rpgq_simulator" type="RPG_FLIGHTMARE.x86_64" unless="$(arg editor)"/>
+    <!-- <node name="rpgg_flightmare_Renderer" pkg="rpgq_simulator" type="RPG_FLIGHTMARE.x86_64" unless="$(arg editor)"/> -->
 
     <node name="simulator" pkg="example_control" type="single_vehicle" output="screen" launch-prefix="gdb -ex run --args" if="$(arg debug)" >
         <param name="scene_name" value="$(arg scene_name)" />

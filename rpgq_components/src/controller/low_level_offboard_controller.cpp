@@ -6,7 +6,8 @@
 namespace RPGQ
 {
     // constructor 
-    LowLevelOffboardController::LowLevelOffboardController(QuadrotorID quadrotorID, std::shared_ptr<Timer> timer, Parameters<NUM_PARAMS> params):
+    LowLevelOffboardController::LowLevelOffboardController(QuadrotorID quadrotorID,
+      std::shared_ptr<Timer> timer, Parameters<NUM_PARAMS> params):
         quadrotorID_(quadrotorID),
         I_eZ_I_(0.0,0.0,1.0),
         I_g_(0.0,0.0,9.81)
@@ -155,8 +156,7 @@ namespace RPGQ
             omegaCmd_.y() = 2.0/params_.GetDouble(tauAttXY)*quatErrRed.y() + omegaDesTilde.y();
             omegaCmd_.z() = 2.0/params_.GetDouble(tauAttZ)*quatErrYaw.z() + omegaDesTilde.z();
 
-        }
-        else
+        } else
         {
             // only feed-forward
             thrustCmd_ = thrustDes_;
@@ -182,6 +182,8 @@ namespace RPGQ
     void LowLevelOffboardController::SetCommandLevel(CommandLevel cmdLevel)
     {
         if (cmdLevel_ == cmdLevel) return;
+        //
+        cmdLevel_ = cmdLevel;
         switch (cmdLevel)
         {
             case CommandLevel::POS_INT_CMD:
@@ -215,6 +217,11 @@ namespace RPGQ
                 break;
             }
 
+            case CommandLevel::FEED_FORWARD:
+            {
+                // nothing
+                break;   
+            }
             default:
             std::printf("[Controller ERROR] Ignoring invalid command level!\n");
         }

@@ -21,88 +21,100 @@
 #include <random>
 #include <unordered_map>
 
-namespace RPGQ
-{
-    namespace Simulator
-    {
-        // forward declaration
-        class BaseObject;
-        class UnityObject;
-        class DirectlyControlledObject;
-        class CompositeObject;
-        class Optitrack;
-        
-        class Simulator
-        {
-        public:
-            // constructor & destructor
-            Simulator(const ros::NodeHandle &nh, const ros::NodeHandle &pnh,
-              USecs maxSimUSecsInterval = 1000000);
-            Simulator(void):
-                Simulator(ros::NodeHandle(""), ros::NodeHandle(ID::Object::Root))
-            {};
-            ~Simulator(void) {};
+namespace RPGQ {
+namespace Simulator {
 
-            // simulation functions
-            void Run(double t);
-            void StartFlightmare(std::string scene_name);
+  // forward declaration
+  class BaseObject;
+  class UnityObject;
+  class DirectlyControlledObject;
+  class CompositeObject;
+  class Optitrack;
 
-            // add objects to rpgq_simulator
-            void AddObject(std::shared_ptr<BaseObject> object);
-            void AddObjectToOptitrack(std::shared_ptr<BaseObject> object);
+  class Simulator
+  {
+  public:
+    // constructor & destructor
+    Simulator(const ros::NodeHandle &nh, const ros::NodeHandle &pnh,
+      USecs maxSimUSecsInterval = 1000000);
+    Simulator(void):
+        Simulator(ros::NodeHandle(""), ros::NodeHandle(ID::Object::Root))
+    {};
+    ~Simulator(void) {};
 
-            // add objects to Unity for visulization or simulation
-            void AddObjectToUnity(std::shared_ptr<UnityObject> object);
-            void AddObjectToUnity(std::shared_ptr<QuadrotorVehicle> vehicle);
-            void AddObjectToUnity(std::shared_ptr<QuadRGBCamera> rgb_vehicle);
-            void AddObjectToUnity(std::shared_ptr<QuadStereoRGBCamera> stereo_rgb_vehicle);
+    void Reset() {
+      // simulation timing variables
+      timer_.reset(new ExtTimer(false, false));
+      minUSecsNextSim_ = 1;   
+      while (!commandSetQueue_.empty()) {
+        commandSetQueue_.pop();
+      }
+    }
 
-            // public set functions
-            void SetCommandSet(const rpgq_msgs::CommandSet &cmdSet);
-            void SetFlightmare(const bool on);
-            void SetScene(const std::string scene_name);
+    // simulation functions
+    void Run(double t);
+    void ConnectFlightmare(const size_t scene_id);
+    void DisconnectFlightmare();
 
-            bool FlightmareIsReady(void) { return flightmareReady_; };
+    // add objects to rpgq_simulator
+    void AddObject(std::shared_ptr<BaseObject> object);
+    void AddObjectToOptitrack(std::shared_ptr<BaseObject> object);
 
-            // public get functions
-            double ElapsedSeconds(void) {return timer_->ElapsedSeconds();};
-            std::shared_ptr<ExtTimer> GetSimTimer(void) {return timer_;};
+    // add objects to Unity for visulization or simulation
+    void AddObjectToUnity(std::shared_ptr<UnityObject> object);
+    void AddObjectToUnity(std::shared_ptr<QuadrotorVehicle> vehicle);
+    void AddObjectToUnity(std::shared_ptr<QuadLidar> lidar_vehicle);
+    void AddObjectToUnity(std::shared_ptr<QuadRGBCamera> rgb_vehicle);
+    void AddObjectToUnity(std::shared_ptr<QuadStereoRGBCamera>
+      stereo_rgb_vehicle);
 
-        private:
-            // general rpgq_simulator variables
-            std::unordered_map<ObjectID, std::shared_ptr<BaseObject>> objects_;
+    // public set functions
+    void SetCommandSet(const rpgq_msgs::CommandSet &cmdSet);
+    void SetFlightmare(const  bool & on);
+    // void SetScene(const std::string & scene_name);
 
-            ros::NodeHandle nh_, pnh_;
+    bool FlightmareIsReady(void) { return flightmareReady_; };
 
-            // simulation timing variables
-            std::shared_ptr<ExtTimer> timer_;
-            ros::Publisher timer_pub_;
-            const USecs maxSimUSecsInterval_;
-            USecs minUSecsNextSim_;
+    // public get functions
+    double ElapsedSeconds(void) {return timer_->ElapsedSeconds();};
+    std::shared_ptr<ExtTimer> GetSimTimer(void) {return timer_;};
 
-            // flightmare
-            bool flightmareReady_{false};
-            RenderMessage_t unity_output_;
-            std::shared_ptr<FlightmareBridge> flightmareBridge_;
+  private:
+    // general rpgq_simulator variables
+    std::unordered_map<ObjectID, std::shared_ptr<BaseObject>> objects_;
 
-            // optitrack
-            std::shared_ptr<CompositeObject> optitrackComposite_;
-            std::shared_ptr<Optitrack> optitrack_;
-            void AddObjectToOptitrackRecursively(std::shared_ptr<BaseObject> object);
+    ros::NodeHandle nh_, pnh_;
 
-            // laird
-            double lairdDropRate_;
-            USecs lairdDelay_;
-            std::queue<rpgq_msgs::CommandSet> commandSetQueue_;
+    // simulation timing variables
+    std::shared_ptr<ExtTimer> timer_;
+    ros::Publisher timer_pub_;
+    const USecs maxSimUSecsInterval_;
+    USecs minUSecsNextSim_;
 
-            // random numbers
-            std::default_random_engine randomEngineGenerator_;
-            std::uniform_real_distribution<double> uniformDistribution_;
+    // flightmare
+    bool flightmareReady_{false};
+    RenderMessage_t unity_output_;
+    std::shared_ptr<FlightmareBridge> flightmareBridge_;
 
-            // auxiliary variables and functions
-            std::unordered_map<ObjectID, std::shared_ptr<DirectlyControlledObject>> directlyControlledObjects_;
-            void AddObjectToDirectlyControlledObjectsRecursively(std::shared_ptr<BaseObject> object);
-        };
+    // optitrack
+    std::shared_ptr<CompositeObject> optitrackComposite_;
+    std::shared_ptr<Optitrack> optitrack_;
+    void AddObjectToOptitrackRecursively(std::shared_ptr<BaseObject> object);
 
-    } // namespace Simulator
+    // laird
+    double lairdDropRate_;
+    USecs lairdDelay_;
+    std::queue<rpgq_msgs::CommandSet> commandSetQueue_;
+
+    // random numbers
+    std::default_random_engine randomEngineGenerator_;
+    std::uniform_real_distribution<double> uniformDistribution_;
+
+    // auxiliary variables and functions
+    std::unordered_map<ObjectID, std::shared_ptr<DirectlyControlledObject>>
+      directlyControlledObjects_;
+    void AddObjectToDirectlyControlledObjectsRecursively(
+      std::shared_ptr<BaseObject> object);
+  };
+} // namespace Simulator
 } // namespace RPGQ

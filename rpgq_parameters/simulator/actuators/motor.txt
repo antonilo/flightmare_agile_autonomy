@@ -8,4 +8,4 @@
 #       4 double3D
 0: 3: 0.05: tau (first order system) [s]
 1: 3: 152.0: minimum angular velocity [rad/s]
-2: 3: 739.0: maximum angular velocity [rad/s]
+2: 3: 838.0: maximum angular velocity [rad/s]

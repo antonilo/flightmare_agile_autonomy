@@ -27,6 +27,14 @@ namespace RPGQ
       height_ = params.GetInt(RGBCamera::height);
       fov_ = params.GetDouble(RGBCamera::fov);
       depth_scale_ = params.GetDouble(RGBCamera::depth_scale);
+
+      //
+      post_processing_= {
+        {RGBCameraTypes::Depth, false},
+        {RGBCameraTypes::OpticalFlow, false},
+        {RGBCameraTypes::ObjectSegment, false},
+        {RGBCameraTypes::CategorySegment, false}
+      };
     }
 
     sensor_msgs::CameraInfo RGBCamera::GetCameraInfo(const USecs & elapsed_useconds)
@@ -51,20 +59,20 @@ namespace RPGQ
 
     void RGBCamera::RunSimulation_(void)
     {
-      // std::cout << "Simulating RGB Camera" << std::endl;
-      PublishImage();
-      if (post_processing_[RGBCameraTypes::Depth])
-      {
-        PublishDepthmap();
-      }
-      if (post_processing_[RGBCameraTypes::ObjectSegment])
-      {
-        PublishObjSegment();
-      }
-      if (post_processing_[RGBCameraTypes::CategorySegment])
-      {
-        PublishCatSegment();
-      }
+//       std::cout << "Simulating RGB Camera" << std::endl;
+//      PublishImage();
+//      if (post_processing_[RGBCameraTypes::Depth])
+//      {
+//        PublishDepthmap();
+//      }
+//      if (post_processing_[RGBCameraTypes::ObjectSegment])
+//      {
+//        PublishObjSegment();
+//      }
+//      if (post_processing_[RGBCameraTypes::CategorySegment])
+//      {
+//        PublishCatSegment();
+//      }
     }
 
     USecs RGBCamera::UpdateSamplingInterval(void)
@@ -197,6 +205,7 @@ namespace RPGQ
         depth_queue_.push_back(depth_image);
         queue_mutex_.unlock();
       }
+
 //      if (post_processing_[RGBCameraTypes::OpticalFlow])
 //      {
 //        queue_mutex_.lock();
@@ -204,6 +213,7 @@ namespace RPGQ
 //        optical_flow_queue_.push_back(optical_flow_image);
 //        queue_mutex_.unlock();
 //      }
+
       if (post_processing_[RGBCameraTypes::ObjectSegment])
       {
         queue_mutex_.lock();
@@ -223,9 +233,70 @@ namespace RPGQ
         queue_mutex_.unlock();
       }
 
-      // hack
-      RunSimulation_();
+      //
+      PublishImage();
     }
 
+    std::vector<std::string> RGBCamera::GetPostProcessing(void)
+    {
+      std::vector<std::string> post_processing;
+      for (const auto & pp : post_processing_){
+        if (pp.second){
+          post_processing.push_back(pp.first);
+        }
+      }
+      return post_processing;
+    }
+
+    void RGBCamera::SetPostProcessing(
+      const std::vector<std::string> & post_processing)
+    {
+      for (const auto & pp : post_processing){
+        if (pp=="depth")
+          post_processing_[RGBCameraTypes::Depth] = true;
+        if (pp=="optical_flow")
+          post_processing_[RGBCameraTypes::OpticalFlow] = true;
+        if (pp=="object_segment")
+          post_processing_[RGBCameraTypes::ObjectSegment] = true;
+        if (pp=="category_segment")
+          post_processing_[RGBCameraTypes::CategorySegment] = true;
+      }
+    }
+
+    void RGBCamera::EnableDepth(const bool & on)
+    {
+      if (on) {
+        post_processing_[RGBCameraTypes::Depth] = true;
+      } else {
+        post_processing_[RGBCameraTypes::Depth] = false;
+      }
+    }
+
+    void RGBCamera::EnableOpticalFlow(const bool & on)
+    {
+      if (on){
+        post_processing_[RGBCameraTypes::OpticalFlow] = true;
+      } else {
+        post_processing_[RGBCameraTypes::OpticalFlow] = false;
+      }
+    }
+
+    void RGBCamera::EnableObjectSegment(const bool & on)
+    {
+      if (on){
+        post_processing_[RGBCameraTypes::ObjectSegment] = true;
+      } else {
+        post_processing_[RGBCameraTypes::ObjectSegment] = false;
+      }
+    }
+
+    void RGBCamera::EnableCategorySegment(const bool & on)
+    {
+      if (on){
+        post_processing_[RGBCameraTypes::CategorySegment] = true;
+      } else {
+        post_processing_[RGBCameraTypes::CategorySegment] = false;
+      }
+    }
   } // namespace Simulator
 } // namespace RPGQ

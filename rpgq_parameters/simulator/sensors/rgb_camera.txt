@@ -1,4 +1,4 @@
-# parameter file for optitrack system
+# parameter file for rgb camera system
 #
 # index : type: value: description
 # type: 0 boolean

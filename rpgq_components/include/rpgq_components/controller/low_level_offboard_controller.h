@@ -43,7 +43,8 @@ namespace RPGQ
             POS_CMD = 1,
             VEL_CMD = 2,
             ACC_CMD = 3,
-            THRUST_ANG_VEL_CMD = 4
+            THRUST_ANG_VEL_CMD = 4,
+            FEED_FORWARD = 5,
         };
 
         // constructor & destructor

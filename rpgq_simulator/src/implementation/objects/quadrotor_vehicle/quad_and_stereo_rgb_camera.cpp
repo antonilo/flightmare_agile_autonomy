@@ -12,7 +12,8 @@ namespace RPGQ
       CompositeObject(ID::Object::QuadrotorStereoRGBCamera, prevSimNode, maxSimUSecsInterval)
     {
       // add quadrotor
-      quadPtr_ = std::make_shared<QuadrotorVehicle>(id, &simNode_, maxSimUSecsInterval);
+      quadPtr_ = std::make_shared<QuadrotorVehicle>(id, &simNode_,
+        maxSimUSecsInterval);
       AddChild(quadPtr_);
 
       // add left rgb camera

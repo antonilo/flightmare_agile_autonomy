@@ -7,7 +7,7 @@ repositories:
     type: git
     url: git@github.com:ethz-asl/eigen_catkin.git
     version: master
-  assimp_ctkin:
+  assimp_catkin:
     type: git
     url: git@github.com:uzh-rpg/assimp_catkin.git
     version: master
@@ -15,3 +15,8 @@ repositories:
     type: git
     url: git@github.com:uzh-rpg/rpg_quadrotor_common.git
     version: master
+  rpg_quadrotor_control:
+    type: git
+    url: git@github.com:uzh-rpg/rpg_quadrotor_control.git
+    version: master
+

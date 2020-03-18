@@ -12,13 +12,15 @@ namespace RPGQ
     namespace Simulator
     {
         // constructor
-        QuadrotorVehicle::QuadrotorVehicle(ObjectID id, const Node* prevSimNode, USecs maxSimUSecsInterval):
-            DirectlyControlledObject(id, prevSimNode, maxSimUSecsInterval)
+        QuadrotorVehicle::QuadrotorVehicle(ObjectID id, const Node* prevSimNode,
+          USecs maxSimUSecsInterval) : DirectlyControlledObject(id, prevSimNode, maxSimUSecsInterval)
         {
             // onboard code
-            commandBridgeClientPtr_ = std::make_shared<CommandBridgeClient>(QuadrotorNameToID(id), ID::OnboardCode::CommandBridgeClient, &simNode_, 1000); // simulate every 1000us -> 1kHz
+            // simulate every 1000us -> 1kHz / 5000 us -> 200Hz
+            commandBridgeClientPtr_ = std::make_shared<CommandBridgeClient>(QuadrotorNameToID(id), ID::OnboardCode::CommandBridgeClient, &simNode_, 1000); 
             AddOnboardCode(commandBridgeClientPtr_);
-            onboardLogicPtr_ = std::make_shared<QuadrotorOnboardLogic>(QuadrotorNameToID(id), ID::OnboardCode::OnboardLogic, &simNode_, 1000); // simulate every 1000us -> 1kHz
+            // simulate every 1000us -> 1kHz / 5000 us -> 200Hz
+            onboardLogicPtr_ = std::make_shared<QuadrotorOnboardLogic>(QuadrotorNameToID(id), ID::OnboardCode::OnboardLogic, &simNode_, 1000);
             AddOnboardCode(onboardLogicPtr_);
 
             // set callbacks manually instead of using ROS publisher/subscriber for onboard code simulation

@@ -38,6 +38,7 @@ namespace RPGQ
                 const ObjectID Optitrack = "optitrack_composite";
 
                 const ObjectID Quadrotor = "quadrotor";
+                const ObjectID QuadLidar = "quadrotor_lidar";
 
                 const ObjectID QuadrotorEventCamera = "quadrotor_event_camera";
                 const ObjectID QuadrotorStereoEventCamera = "quadrotor_stereo_event_camera";
@@ -45,13 +46,14 @@ namespace RPGQ
                 const ObjectID QuadrotorRGBCamera = "quadrotor_rgb_camera";
                 const ObjectID QuadrotorStereoRGBCamera = "quadrotor_stereo_rgb_camera";
 
+
                 const ObjectID SoccerBall = "soccer_ball";
                 const ObjectID UnityGate = "unity_gate";
                 const ObjectID UnitySoccerBall = "soccer_ball";
             }
         }
 
-        // objects
+        // Unity objects
         typedef std::string PrefabID;
 
         namespace ID
@@ -110,6 +112,7 @@ namespace RPGQ
             namespace Sensor
             {
                 const SensorID IMU = "imu";
+                const SensorID Lidar = "lidar";
                 const SensorID RGBCamera = "rgb_camera";
                 const SensorID EventCamera = "event_camera";
                 const SensorID Optitrack = "optitrack";

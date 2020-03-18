@@ -56,6 +56,7 @@ namespace RPGQ
             void SetQuat(Eigen::Quaterniond quat) {state_.segment(6,4) = quat.coeffs();};
             void SetOmega(Eigen::Vector3d omega) {state_.segment(10,3) = omega;};
             void SetRotorOmega(Eigen::Vector4d omega);
+            void SetBox(Eigen::Vector3d box_size) { box_size_= box_size; };
 
         private:
             // system dynamics
@@ -73,6 +74,8 @@ namespace RPGQ
             double cF_;
             Eigen::Matrix4d B_;
 
+            // World constraints (x, y, z -> in meters)
+            Eigen::Vector3d box_size_{1e10, 1e10, 1e10};
         };
 
     } // namespace Simulator

@@ -20,6 +20,12 @@ namespace RPGQ
       void AddObject(std::shared_ptr<BaseObject> object);
 
       // public get functions
+      Eigen::Vector3d GetPos(void) {return quadPtr_->GetPos(); };
+      Eigen::Vector3d GetVel(void) {return quadPtr_->GetVel();};
+      Eigen::Vector3d GetAcc(void) {return quadPtr_->GetAcc();};
+      Eigen::Quaterniond GetQuat(void) {return quadPtr_->GetQuat();};
+      Eigen::Vector3d GetOmega(void) {return quadPtr_->GetOmega();};
+      Eigen::Vector3d GetPsi(void) {return quadPtr_->GetPsi();};
       const std::shared_ptr<QuadrotorVehicle> GetQuad(void)
         {return quadPtr_;};
       const std::shared_ptr<RGBCamera> GetRGBCamera(void)

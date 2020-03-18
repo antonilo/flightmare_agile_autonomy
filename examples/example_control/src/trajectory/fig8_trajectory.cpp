@@ -1,4 +1,4 @@
-#include <trajectory/trajectory.h>
+#include <trajectory/fig8_trajectory.h>
 
 #include <cmath>
 

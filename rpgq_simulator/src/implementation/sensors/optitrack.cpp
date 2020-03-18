@@ -26,11 +26,11 @@ namespace RPGQ
         void Optitrack::AddObject(std::shared_ptr<PhysicalObject> physicalObject)
         {
             // store pointer to object and create new publisher and message queue
-            objects_.push_back(physicalObject);
+            objects_.emplace(physicalObject->GetID(), physicalObject);
 
             ros::Publisher pub = pnh_.advertise<geometry_msgs::PoseStamped>(GetSimTreePath(simNode_) + "/" + physicalObject->GetID(), 10);
-            pubs_.push_back(pub);
-            msgDeques_.push_back(std::deque<geometry_msgs::PoseStamped>());
+            pubs_.emplace(physicalObject->GetID(), pub);
+            msgDeques_.emplace(physicalObject->GetID(), std::deque<geometry_msgs::PoseStamped>());
         }
 
 
@@ -42,18 +42,20 @@ namespace RPGQ
             header.stamp.fromNSec(1000*timer_.ElapsedUSeconds());
             header.seq = frameCounter_++;
 
-            for (uint i=0; i < objects_.size(); i++)
+            std::cout << objects_.size() ;
+            for (const auto & obj : objects_)
             {
+                ObjectID obj_id = obj.first;
                 // generate new geometry message
                 geometry_msgs::PoseStamped poseMsg;
                 poseMsg.header = header; // all rpgq_msgs have the same header
 
-                Eigen::Vector3d pos = objects_.at(i)->GetPos();
+                Eigen::Vector3d pos = obj.second->GetPos();
                 poseMsg.pose.position.x = pos(0) + posNoise_(gen_);
                 poseMsg.pose.position.y = pos(1) + posNoise_(gen_);;
                 poseMsg.pose.position.z = pos(2) + posNoise_(gen_);;
 
-                Eigen::Quaterniond quat = objects_.at(i)->GetQuat();
+                Eigen::Quaterniond quat = obj.second->GetQuat();
                 Eigen::Vector3d k(auxRotNoise_(gen_), auxRotNoise_(gen_), auxRotNoise_(gen_));
                 while (k.norm() < 1e-6)
                 {
@@ -69,15 +71,15 @@ namespace RPGQ
                 poseMsg.pose.orientation.z = quat.z();
 
                 // add message to queue
-                msgDeques_.at(i).push_back(poseMsg);
+                msgDeques_[obj_id].push_back(poseMsg);
 
                 // publish messages if necessary
-                while (msgDeques_.at(i).size() > 0)
+                while (msgDeques_[obj_id].size() > 0)
                 {
-                    if (msgDeques_.at(i).front().header.stamp + latency_ <= header.stamp)
+                    if (msgDeques_[obj_id].front().header.stamp + latency_ <= header.stamp)
                     {
-                        pubs_.at(i).publish(msgDeques_.at(i).front());
-                        msgDeques_.at(i).pop_front();
+                        pubs_[obj_id].publish(msgDeques_[obj_id].front());
+                        msgDeques_[obj_id].pop_front();
                     }
                     else
                     {

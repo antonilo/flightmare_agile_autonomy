@@ -11,7 +11,7 @@
 #include <cmath>
 
 // others
-#include <trajectory/trajectory.h>
+#include <trajectory/fig8_trajectory.h>
 
 #define CONTROL_UPDATE_RATE 50.0
 
@@ -24,12 +24,7 @@ int main(int argc, char * argv[]) {
   ros::NodeHandle pnh("~");
 
   // define the scene name
-  std::string sceneName;
-  if (!pnh.getParam("scene_name", sceneName))
-  {
-    ROS_ERROR("[%s] Could not determine scene name.", pnh.getNamespace().c_str());
-    return -1;
-  }
+  FlightmareTypes::SceneID scene_id = FlightmareTypes::SCENE_WAREHOUSE;
 
   // quad ID can be any real number between
   // 0 ~ 25, each ID corresponding to a unique
@@ -120,7 +115,7 @@ int main(int argc, char * argv[]) {
     // enable visualization and add objects
     if (!sim->FlightmareIsReady())
     {
-      sim->StartFlightmare(sceneName);
+      sim->ConnectFlightmare(scene_id);
     }
     // start measuring time
     loopTimer.Reset();

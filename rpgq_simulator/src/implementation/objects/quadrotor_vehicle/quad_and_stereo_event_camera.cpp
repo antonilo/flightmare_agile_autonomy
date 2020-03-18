@@ -13,7 +13,8 @@ namespace RPGQ
             CompositeObject(ID::Object::QuadrotorStereoEventCamera, prevSimNode, maxSimUSecsInterval)
         {
             // add children
-            quadPtr_ = std::make_shared<QuadrotorVehicle>(id, &simNode_, maxSimUSecsInterval);
+            quadPtr_ = std::make_shared<QuadrotorVehicle>(id, &simNode_,
+              maxSimUSecsInterval);
             AddChild(quadPtr_);
 
             // add sensor

@@ -153,7 +153,7 @@ namespace RPGQ
             Eigen::Matrix3d Kinv_tau_, K_zeta_;
             double k_p_xy_, k_p_z_; Eigen::Matrix3d K_D_;
             Eigen::Matrix3d Kinv_ang_vel_tau_;
-            
+
             double mass_;
             Eigen::Matrix3d J_;
 

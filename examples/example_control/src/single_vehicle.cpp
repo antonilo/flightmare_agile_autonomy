@@ -11,7 +11,7 @@
 #include <cmath>
 
 // others
-#include <trajectory/trajectory.h>
+#include <trajectory/fig8_trajectory.h>
 
 #define CONTROL_UPDATE_RATE 50.0
 
@@ -23,13 +23,8 @@ int main(int argc, char * argv[]) {
   ros::NodeHandle nh("");
   ros::NodeHandle pnh("~");
 
-  // define the scene name
-  std::string sceneName;
-  if (!pnh.getParam("scene_name", sceneName))
-  {
-    ROS_ERROR("[%s] Could not determine scene name.", pnh.getNamespace().c_str());
-    return -1;
-  }
+  // define the scene id
+  FlightmareTypes::SceneID scene_id = FlightmareTypes::SCENE_WAREHOUSE;
 
   // quad ID can be any real number between
   // 0 ~ 25, each ID corresponding to a unique
@@ -45,7 +40,8 @@ int main(int argc, char * argv[]) {
   // create a quadrotor with a RGB Camera on it.
   std::shared_ptr<Simulator::QuadrotorVehicle> quad =
     std::make_shared<Simulator::QuadrotorVehicle>(quadName, nullptr, 1000000);
-  quad->SetPos(Eigen::Vector3d(0.0, 0.0, 8.0));
+  Eigen::Vector3d init_pose{0.0, 0.0, 3.0};
+  quad->SetPos(init_pose);
   quad->SetQuat(Eigen::Quaterniond(std::cos(0.5*M_PI_2),0.0,0.0,std::sin(0.5*M_PI_2)));
   quad->SetSize(Eigen::Vector3d(0.3, 0.3, 0.3));
 
@@ -71,24 +67,22 @@ int main(int argc, char * argv[]) {
   // set up controller
   LowLevelOffboardController ctrl(quadID, timer);
   ctrl.SetCommandLevel(LowLevelOffboardController::CommandLevel::POS_CMD);
-  ctrl.SetPosDes(Eigen::Vector3d(0.0, 0.0, 2.0));
+  ctrl.SetPosDes(init_pose);
   ctrl.SetYawDes(0.0);
 
   // set up figure8 trajectory
   bool fig8Started = false;
   Trajectory trajectory(sim->GetSimTimer());
-  trajectory.SetStartPose(Eigen::Vector3d(0.0, 0.0, 2.0), 0.0);
+  trajectory.SetStartPose(init_pose, 0.0);
 
   // main loop
   Timer loopTimer;
 
   while (ros::ok())
   {
-
     // enable visualization and add objects
-    if (!sim->FlightmareIsReady())
-    {
-      sim->StartFlightmare(sceneName);
+    if (!sim->FlightmareIsReady()){
+      sim->ConnectFlightmare(scene_id);
     }
     // start measuring time
     loopTimer.Reset();

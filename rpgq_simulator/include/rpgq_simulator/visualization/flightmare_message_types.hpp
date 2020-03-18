@@ -24,13 +24,17 @@ using json = nlohmann::json;
 
 namespace RPGQ
 {
+  namespace FlightmareTypes
+  {
+    typedef uint64_t USecs;
+
+    typedef size_t SceneID;
+    const SceneID SCENE_WAREHOUSE = 0;
+    const SceneID SCENE_NATUREFOREST = 1;
+  }
+
   namespace Simulator
   {
-     namespace FlightmareTypes
-     {
-       typedef uint64_t USecs;
-     }
-
     // Unity Camera, should not be used alone.
     // has to be attached on a vehicle.
     struct Camera_t
@@ -56,6 +60,21 @@ namespace RPGQ
                                  0.0, 0.0, 0.0, 0.0};
     };
 
+    struct Lidar_t
+    {
+      std::string ID;
+      int num_beams{10};
+      double max_distance{10.0};
+      double start_scan_angle{-M_PI/2};
+      double end_scan_angle{M_PI/2};
+      // Transformation matrix from lidar to vehicle body 4 x 4
+      // use 1-D vector for json convention
+      std::vector<double> T_BS { 0.0, 0.0, 0.0, 0.0,
+                                 0.0, 0.0, 0.0, 0.0,
+                                 0.0, 0.0, 0.0, 0.0,
+                                 0.0, 0.0, 0.0, 0.0};
+    };
+
     // Unity Vechicle, e.g., quadrotor
     struct Vehicle_t
     {
@@ -67,6 +86,7 @@ namespace RPGQ
       std::vector<double> size{1.0, 1.0, 1.0}; // scale
       // sensors attached on the vehicle
       std::vector<Camera_t> cameras;
+      std::vector<Lidar_t> lidars;
       // collision check
       bool has_collision_check = true;
     };
@@ -86,12 +106,12 @@ namespace RPGQ
     struct SettingsMessage_t
     {
       // scene/render settings
-      bool scene_is_internal{true};
-      std::string scene_filename;
+       size_t scene_id = FlightmareTypes::SCENE_WAREHOUSE;
 
-      // ONLY Support one vehicle for now....
+      //
       std::vector<Vehicle_t> vehicles;
       std::vector<Object_t> objects;
+      //
     };
 
     struct PubMessage_t
@@ -101,20 +121,19 @@ namespace RPGQ
       std::vector<Object_t> objects;
     };
 
+    //
+    struct Sub_Vehicle_t
+    {
+      bool collision;
+      std::vector<double> lidar_ranges;
+    };
+
     struct SubMessage_t
     {
       //
       FlightmareTypes::USecs ntime{0};
-      int camWidth;
-      int camHeight;
-      double camDepthScale;
-      // Object state update
-      std::vector<std::string> cameraIDs;
-      std::vector<int> channels;
-
-      // collision detector and raycaster update
-      bool has_vehicle_collision;
-      float lidar_return;
+      //
+      std::vector<Sub_Vehicle_t> sub_vehicles;
     };
 
 
@@ -136,6 +155,16 @@ namespace RPGQ
       };
     }
 
+    // Lidar
+    inline void to_json(json &j, const Lidar_t & o){
+      j = json{{"ID", o.ID},
+               {"num_beams", o.num_beams},
+               {"max_distance", o.max_distance},
+               {"start_angle", o.start_scan_angle},
+               {"end_angle", o.end_scan_angle},
+               {"T_BS", o.T_BS}
+      };
+    }
     // Vehicle_t
     inline void to_json(json &j, const Vehicle_t &o) {
       j = json{{"ID", o.ID},
@@ -143,6 +172,7 @@ namespace RPGQ
                {"rotation", o.rotation},
                {"size", o.size},
                {"cameras", o.cameras},
+               {"lidars", o.lidars},
                {"hasCollisionCheck", o.has_collision_check}
       };
     }
@@ -159,8 +189,7 @@ namespace RPGQ
 
     // Setting messages, pub to unity
     inline void to_json(json &j, const SettingsMessage_t &o) {
-      j = json{{"sceneIsInternal", o.scene_is_internal},
-               {"sceneFilename", o.scene_filename},
+      j = json{{"scene_id", o.scene_id},
                {"vehicles", o.vehicles},
                {"objects", o.objects}
       };
@@ -174,15 +203,18 @@ namespace RPGQ
       };
     }
 
-    // Subscribe message from unity
+    // Publish messages to unity
+    inline void from_json(const json &j, Sub_Vehicle_t &o) {
+      o.collision = j.at("collision").get<bool>();
+      o.lidar_ranges = j.at("lidar_ranges").get<std::vector<double >>();
+    }
+
+    // json to our sub message data type
+    // note: pub_vechicles is defined in Unity which corresponding
+    // to our sub_vehicles in ROS.
     inline void from_json(const json &j, SubMessage_t &o) {
       o.ntime = j.at("ntime").get<FlightmareTypes::USecs>();
-      o.camWidth = j.at("camWidth").get<int>();
-      o.camHeight = j.at("camHeight").get<int>();
-      o.cameraIDs = j.at("cameraIDs").get<std::vector<std::string>>();
-      o.channels = j.at("channels").get<std::vector<int>>();
-      o.has_vehicle_collision = j.at("hasVehicleCollision").get<bool>();
-      o.lidar_return = j.at("lidarReturn").get<float>();
+      o.sub_vehicles = j.at("pub_vehicles").get<std::vector<Sub_Vehicle_t>>();
     }
 
     // Struct for outputting parsed received messages to handler functions
