@@ -59,20 +59,24 @@ namespace RPGQ
 
     void RGBCamera::RunSimulation_(void)
     {
-//       std::cout << "Simulating RGB Camera" << std::endl;
-//      PublishImage();
-//      if (post_processing_[RGBCameraTypes::Depth])
-//      {
-//        PublishDepthmap();
-//      }
-//      if (post_processing_[RGBCameraTypes::ObjectSegment])
-//      {
-//        PublishObjSegment();
-//      }
-//      if (post_processing_[RGBCameraTypes::CategorySegment])
-//      {
-//        PublishCatSegment();
-//      }
+      std::cout << "Simulating RGB Camera" << std::endl;
+     PublishImage();
+     if (post_processing_[RGBCameraTypes::Depth])
+     {
+       PublishDepthmap();
+     }
+     if (post_processing_[RGBCameraTypes::ObjectSegment])
+     {
+       PublishObjSegment();
+     }
+     if (post_processing_[RGBCameraTypes::CategorySegment])
+     {
+       PublishCatSegment();
+     }
+     if (post_processing_[RGBCameraTypes::OpticalFlow])
+     {
+       PublishOpticFlow();
+     }
     }
 
     USecs RGBCamera::UpdateSamplingInterval(void)
@@ -85,6 +89,9 @@ namespace RPGQ
       imgPub_.shutdown();
       depthmapPub_.shutdown();
       opticFlowPub_.shutdown();
+      categorySegmentPub_.shutdown();
+      objSegmentPub_.shutdown();
+      cameraInfoPub_.shutdown();
     }
 
     void RGBCamera::PublishImage()
@@ -138,10 +145,19 @@ namespace RPGQ
       }
     }
 
-//    void RGBCamera::PublishOpticFlow(const RGBCameraTypes::OpticFlow_t &optic_flow)
-//    {
-//
-//    }
+  //  void RGBCamera::PublishOpticFlow(const RGBCameraTypes::OpticFlow_t &optic_flow)
+  void RGBCamera::PublishOpticFlow()
+   {
+      if (!optical_flow_queue_.empty())
+      {
+        RGBCameraTypes::OpticFlow_t opticflow_map = optical_flow_queue_.front();
+        sensor_msgs::ImagePtr opticflow_msg = cv_bridge::CvImage(std_msgs::Header(),
+          "bgr8", opticflow_map.image).toImageMsg();
+        opticflow_msg->header.stamp.fromNSec(1000*opticflow_map.elapsed_useconds);
+        opticFlowPub_.publish(opticflow_msg);
+        optical_flow_queue_.pop_front();
+      }
+   }
 
     void RGBCamera::PublishObjSegment()
     {
@@ -206,13 +222,15 @@ namespace RPGQ
         queue_mutex_.unlock();
       }
 
-//      if (post_processing_[RGBCameraTypes::OpticalFlow])
-//      {
-//        queue_mutex_.lock();
-//        RGBCameraTypes::OpticFlow_t optical_flow_image = images[RGBCameraTypes::OpticalFlow];
-//        optical_flow_queue_.push_back(optical_flow_image);
-//        queue_mutex_.unlock();
-//      }
+     if (post_processing_[RGBCameraTypes::OpticalFlow])
+     {
+       queue_mutex_.lock();
+       RGBCameraTypes::OpticFlow_t optical_flow_image;
+       optical_flow_image.image = images[RGBCameraTypes::OpticalFlow];
+       optical_flow_image.elapsed_useconds = ROSTIME_TO_USECS(img_timestamp);
+       optical_flow_queue_.push_back(optical_flow_image);
+       queue_mutex_.unlock();
+     }
 
       if (post_processing_[RGBCameraTypes::ObjectSegment])
       {

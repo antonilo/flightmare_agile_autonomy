@@ -39,32 +39,32 @@ int main(int argc, char * argv[]) {
   //
   sim.SetFlightmare(true);
 
-  // create a quadrotor with a RGB Camera on it.
-//  std::shared_ptr<Simulator::QuadRGBCamera> quadRGB =
-//    std::make_shared<Simulator::QuadRGBCamera>(quadName, nullptr, 1000000);
+ // create a quadrotor with a RGB Camera on it.
+ std::shared_ptr<Simulator::QuadRGBCamera> quadRGB =
+   std::make_shared<Simulator::QuadRGBCamera>(quadName, nullptr, 1000000);
 
-//  std::shared_ptr<Simulator::RGBCamera> rgb = quadRGB->GetRGBCamera();
-//   TODO: the color encoding of optical flow is not right
-//  rgb->EnableOpticalFlow(false);
-//  rgb->EnableDepth(true);
-//  rgb->EnableObjectSegment(true);
-//  rgb->EnableCategorySegment(true);
-//  rgb->SetWidth(320);
-//  rgb->SetHeight(240);
+ std::shared_ptr<Simulator::RGBCamera> rgb = quadRGB->GetRGBCamera();
+  //TODO: the color encoding of optical flow is not right
+ rgb->EnableOpticalFlow(true);
+ rgb->EnableDepth(true);
+ rgb->EnableObjectSegment(true);
+ rgb->EnableCategorySegment(true);
+ rgb->SetWidth(320);
+ rgb->SetHeight(240);
 
-  std::shared_ptr<Simulator::QuadLidar> quadLidar =
-    std::make_shared<Simulator::QuadLidar>(quadName, nullptr, 1000000);
+  // std::shared_ptr<Simulator::QuadLidar> quadLidar =
+  //   std::make_shared<Simulator::QuadLidar>(quadName, nullptr, 1000000);
 
-  std::shared_ptr<Simulator::QuadrotorVehicle> quad = quadLidar->GetQuad();
+  std::shared_ptr<Simulator::QuadrotorVehicle> quad = quadRGB->GetQuad();
   Eigen::Vector3d init_position{0.0, 0.0, 2.0};
   quad->SetPos(init_position);
   quad->SetQuat(Eigen::Quaterniond(std::cos(0.5*M_PI_2),0.0,0.0,std::sin(0.5*M_PI_2)));
   quad->SetSize(Eigen::Vector3d(1, 1, 1));
 
-  sim.AddObjectToOptitrack(quadLidar);
+  sim.AddObjectToOptitrack(quadRGB);
 
   // add the quadrotor with RGB camera to Unity
-  sim.AddObjectToUnity(quadLidar);
+  sim.AddObjectToUnity(quadRGB);
 
   // add gate to the simulator
   std::string gate_prefab_name = "rpg_gate";
