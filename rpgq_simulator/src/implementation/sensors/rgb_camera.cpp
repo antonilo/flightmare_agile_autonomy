@@ -98,6 +98,9 @@ namespace RPGQ
     {
       if (!image_queue_.empty())
       {
+        std::cout << "Image queue size: " << image_queue_.size() << std::endl;
+        // set lower max queue size to prevent infinite memory usage
+        if (image_queue_.size() > queue_size_) image_queue_.resize(queue_size_);
         RGBCameraTypes::RGBImage_t rgb_image = image_queue_.front();
         sensor_msgs::ImagePtr img_msg = cv_bridge::CvImage(std_msgs::Header(),
           "bgr8", rgb_image.image).toImageMsg();
@@ -128,6 +131,9 @@ namespace RPGQ
     {
       if (!depth_queue_.empty())
       {
+        std::cout << "Depth Image queue size: " << depth_queue_.size() << std::endl;
+        // set lower max queue size to prevent infinite memory usage
+        if (depth_queue_.size() > queue_size_) depth_queue_.resize(queue_size_);
         RGBCameraTypes::Depthmap_t depth_map = depth_queue_.front();
         sensor_msgs::ImagePtr depth_msg = cv_bridge::CvImage(std_msgs::Header(),
           "bgr8", depth_map.image).toImageMsg();
@@ -150,6 +156,9 @@ namespace RPGQ
    {
       if (!optical_flow_queue_.empty())
       {
+        std::cout << "Optical flow image queue size: " << optical_flow_queue_.size() << std::endl;
+        // set lower max queue size to prevent infinite memory usage
+        if (optical_flow_queue_.size() > queue_size_) optical_flow_queue_.resize(queue_size_);
         RGBCameraTypes::OpticFlow_t opticflow_map = optical_flow_queue_.front();
         sensor_msgs::ImagePtr opticflow_msg = cv_bridge::CvImage(std_msgs::Header(),
           "bgr8", opticflow_map.image).toImageMsg();
@@ -163,6 +172,9 @@ namespace RPGQ
     {
       if (!obj_seg_queue_.empty())
       {
+        std::cout << "Object segmention image queue size: " << obj_seg_queue_.size() << std::endl;
+        // set lower max queue size to prevent infinite memory usage
+        if (obj_seg_queue_.size() > queue_size_) obj_seg_queue_.resize(queue_size_);
         RGBCameraTypes::Segement_t obj_seg = obj_seg_queue_.front();
         sensor_msgs::ImagePtr obj_seg_msg = cv_bridge::CvImage(std_msgs::Header(),
           "bgr8", obj_seg.image).toImageMsg();
@@ -184,6 +196,9 @@ namespace RPGQ
     {
       if (!category_seg_queue_.empty())
       {
+        std::cout << "Category segmention image queue size: " << category_seg_queue_.size() << std::endl;
+        // set lower max queue size to prevent infinite memory usage
+        if (category_seg_queue_.size() > queue_size_) category_seg_queue_.resize(queue_size_);
         RGBCameraTypes::Segement_t category_seg = category_seg_queue_.front();
         sensor_msgs::ImagePtr category_seg_msg = cv_bridge::CvImage(std_msgs::Header(),
           "bgr8", category_seg.image).toImageMsg();

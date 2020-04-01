@@ -190,6 +190,7 @@ namespace RPGQ
 
       // image data buffer
       std::mutex queue_mutex_;
+      int queue_size_ = 100;
       std::deque<RGBCameraTypes::RGBImage_t> image_queue_;
       std::deque<RGBCameraTypes::Depthmap_t>  depth_queue_;
       std::deque<RGBCameraTypes::OpticFlow_t> optical_flow_queue_;
