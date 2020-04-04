@@ -17,5 +17,6 @@
     <depend>rpgq_simulator</depend>
     <depend>quadrotor_common</depend>
     <depend>quadrotor_msgs</depend>
+    <depend>polynomial_trajectories</depend>
 
 </package>

@@ -19,6 +19,7 @@ cs_add_executable(single_vehicle_and_rgb_camera src/single_vehicle_and_rgb_camer
 cs_add_executable(single_vehicle_and_stereo_camera src/single_vehicle_and_stereo_camera.cpp src/trajectory/fig8_trajectory.cpp)
 cs_add_executable(multi_vehicle_and_rgb_camera src/multi_vehicle_and_rgb_camera.cpp src/trajectory/fig8_trajectory.cpp)
 cs_add_executable(single_vehicle_heading_controller src/single_vehicle_heading_controller.cpp src/heading_controller/heading_controller.cpp)
+cs_add_executable(single_vehicle_and_rgb_camera_trajectory_with_waypoints src/single_vehicle_and_rgb_camera_trajectory_with_waypoints.cpp)
 
 
 # link the executable to the necessary libraries
@@ -59,6 +60,11 @@ target_link_libraries(single_vehicle_heading_controller
         zmq
         zmqpp
         )
-
+# link the executable to the necessary libraries
+target_link_libraries(single_vehicle_and_rgb_camera_trajectory_with_waypoints
+        ${catkin_LIBRARIES}
+        zmq
+        zmqpp
+        )
 
 cs_install()

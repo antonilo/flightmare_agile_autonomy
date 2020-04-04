@@ -266,8 +266,8 @@ namespace RPGQ
         queue_mutex_.unlock();
       }
 
-      //
-      PublishImage();
+      // Published in Run simulation
+      // PublishImage();
     }
 
     std::vector<std::string> RGBCamera::GetPostProcessing(void)
