@@ -66,7 +66,7 @@ int main(int argc, char * argv[]) {
 
   //initialize position, orientation and scale of quad
   std::shared_ptr<Simulator::QuadrotorVehicle> quad = quadRGB->GetQuad();
-  Eigen::Vector3d init_position{-10.0, 0.0, 1.0};
+  Eigen::Vector3d init_position{-10.0, 0.0, 4.0};
   Eigen::Quaterniond init_orientation(std::cos(0.5*M_PI_2),0.0,0.0,std::sin(0.5*M_PI_2));
   quad->SetPos(init_position);
   quad->SetQuat(init_orientation);
@@ -174,8 +174,9 @@ int main(int argc, char * argv[]) {
   }
 
   // Messages for RVIZ
+  ros::Publisher act_pub = nh.advertise<geometry_msgs::PoseStamped>("actual_position", 1000);
   ros::Publisher pos_pub = nh.advertise<geometry_msgs::PoseStamped>("drone_position", 1000);
-  ros::Publisher path_pub = nh.advertise<nav_msgs::Path>("drone_position", 1000);
+  ros::Publisher path_pub = nh.advertise<nav_msgs::Path>("drone_path", 1000);
   ros::Rate loop_rate(10);
 
   nav_msgs::Path path_msg;
@@ -184,15 +185,15 @@ int main(int argc, char * argv[]) {
   
   std::vector<geometry_msgs::PoseStamped> poses;
 
-  for (int i = 0; i<ceil((trajectory.T).toSec())*4; i++){
+  for (int i = 0; i<ceil((trajectory.T).toSec())*4*1000; i++){
         geometry_msgs::PoseStamped msg_pose;
         geometry_msgs::Pose pose;
         Eigen::Isometry3d new_pose;
 
-        quadrotor_common::TrajectoryPoint path_pose_t = polynomial_trajectories::getPointFromTrajectory(trajectory, ros::Duration(i));
+        quadrotor_common::TrajectoryPoint path_pose_t = polynomial_trajectories::getPointFromTrajectory(trajectory, ros::Duration(i/1000.0));
         new_pose.translation() = path_pose_t.position;
         tf::poseEigenToMsg(new_pose, pose);
-        //tf::quaternionEigenToMsg(path_pose_t.orientation, pose.orientation);
+        tf::quaternionEigenToMsg(path_pose_t.orientation, pose.orientation);
         msg_pose.header.stamp = ros::Time::now();
         msg_pose.header.frame_id = "map"; //string map or world
         // msg_pose.header.seq = 1; //not important for visualization
@@ -229,20 +230,24 @@ int main(int argc, char * argv[]) {
       quadrotor_common::TrajectoryPoint desired_pose = polynomial_trajectories::getPointFromTrajectory(trajectory, ros::Duration(elapsed_time-2.0));
       quad->SetPos(desired_pose.position);
       quad->SetQuat(desired_pose.orientation);
+      quad->SetVel(desired_pose.velocity);
+      quad->SetOmega(desired_pose.bodyrates);
 
       geometry_msgs::PoseStamped msg_pose;
       geometry_msgs::Pose pose;
       Eigen::Isometry3d new_pose;
       new_pose.translation() = desired_pose.position;
       tf::poseEigenToMsg(new_pose, pose);
-      //tf::quaternionEigenToMsg(desired_pose.orientation, pose.orientation);
+      tf::quaternionEigenToMsg(desired_pose.orientation, pose.orientation);
       msg_pose.header.stamp = ros::Time::now();
       msg_pose.header.frame_id = "map"; //string map or world
       // msg_pose.header.seq = 1; //not important for visualization
       msg_pose.pose = pose; 
       pos_pub.publish(msg_pose);
+      path_msg.header.stamp = msg_pose.header.stamp;
+      path_pub.publish(path_msg);
 
-
+  
 
       // ctrl.SetPosDes(desired_pose.position);
       // ctrl.SetVelDes(desired_pose.velocity);
@@ -252,6 +257,24 @@ int main(int argc, char * argv[]) {
       // ctrl.SetYawDes(-yaw + M_PI_2);
       // ctrl.SetOmegaDes(desired_pose.bodyrates);
     }
+    else{
+      quad->SetPos(init_position);
+      quad->SetQuat(init_orientation);
+      quad->SetVel(Eigen::Vector3d{0, 0, 9.81});
+      quad->SetOmega(Eigen::Vector3d::Zero());
+    }
+
+      geometry_msgs::PoseStamped msg_pose;
+      geometry_msgs::Pose pose;
+      Eigen::Isometry3d new_pose;
+      new_pose.translation() = quad->GetPos();
+      tf::poseEigenToMsg(new_pose, pose);
+      tf::quaternionEigenToMsg(quad->GetQuat(), pose.orientation);
+      msg_pose.header.stamp = ros::Time::now();
+      msg_pose.header.frame_id = "map"; //string map or world
+      // msg_pose.header.seq = 1; //not important for visualization
+      msg_pose.pose = pose; 
+      act_pub.publish(msg_pose);
 
     //run controller
     // rpgq_msgs::CommandSet cmdSet;
