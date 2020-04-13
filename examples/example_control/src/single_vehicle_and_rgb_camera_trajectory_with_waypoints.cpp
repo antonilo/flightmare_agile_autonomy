@@ -19,8 +19,13 @@
 #include <polynomial_trajectories/polynomial_trajectories_common.h>
 
 // message
-#include "geometry_msgs/PoseStamped.h"
-#include "nav_msgs/Path.h"
+#include <tf/tf.h>
+#include <tf_conversions/tf_eigen.h>
+#include <eigen_conversions/eigen_msg.h>
+#include <geometry_msgs/Vector3.h>
+#include <geometry_msgs/Pose.h>
+#include <geometry_msgs/PoseStamped.h>
+#include <nav_msgs/Path.h>
 
 #define CONTROL_UPDATE_RATE 50.0
 
@@ -166,7 +171,36 @@ int main(int argc, char * argv[]) {
     gate_i->SetRotation(way_points_orientation.at(i));
     // add objects to unity for simulation and visulization.
     sim.AddObjectToUnity(gate_i);
-}
+  }
+
+  // Messages for RVIZ
+  ros::Publisher pos_pub = nh.advertise<geometry_msgs::PoseStamped>("drone_position", 1000);
+  ros::Publisher path_pub = nh.advertise<nav_msgs::Path>("drone_position", 1000);
+  ros::Rate loop_rate(10);
+
+  nav_msgs::Path path_msg;
+  path_msg.header.stamp = ros::Time::now();
+  path_msg.header.frame_id = "map";
+  
+  std::vector<geometry_msgs::PoseStamped> poses;
+
+  for (int i = 0; i<ceil((trajectory.T).toSec())*4; i++){
+        geometry_msgs::PoseStamped msg_pose;
+        geometry_msgs::Pose pose;
+        Eigen::Isometry3d new_pose;
+
+        quadrotor_common::TrajectoryPoint path_pose_t = polynomial_trajectories::getPointFromTrajectory(trajectory, ros::Duration(i));
+        new_pose.translation() = path_pose_t.position;
+        tf::poseEigenToMsg(new_pose, pose);
+        //tf::quaternionEigenToMsg(path_pose_t.orientation, pose.orientation);
+        msg_pose.header.stamp = ros::Time::now();
+        msg_pose.header.frame_id = "map"; //string map or world
+        // msg_pose.header.seq = 1; //not important for visualization
+        msg_pose.pose = pose; 
+        poses.insert(poses.begin() + i, msg_pose);
+  }
+  path_msg.poses = poses;
+  path_pub.publish(path_msg);  
 
   
   // main loop
@@ -195,6 +229,21 @@ int main(int argc, char * argv[]) {
       quadrotor_common::TrajectoryPoint desired_pose = polynomial_trajectories::getPointFromTrajectory(trajectory, ros::Duration(elapsed_time-2.0));
       quad->SetPos(desired_pose.position);
       quad->SetQuat(desired_pose.orientation);
+
+      geometry_msgs::PoseStamped msg_pose;
+      geometry_msgs::Pose pose;
+      Eigen::Isometry3d new_pose;
+      new_pose.translation() = desired_pose.position;
+      tf::poseEigenToMsg(new_pose, pose);
+      //tf::quaternionEigenToMsg(desired_pose.orientation, pose.orientation);
+      msg_pose.header.stamp = ros::Time::now();
+      msg_pose.header.frame_id = "map"; //string map or world
+      // msg_pose.header.seq = 1; //not important for visualization
+      msg_pose.pose = pose; 
+      pos_pub.publish(msg_pose);
+
+
+
       // ctrl.SetPosDes(desired_pose.position);
       // ctrl.SetVelDes(desired_pose.velocity);
       // ctrl.SetAccDes(desired_pose.acceleration);
