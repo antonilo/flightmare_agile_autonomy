@@ -237,15 +237,6 @@ namespace RPGQ
             //cv::normalize(image, cvFrame.image, 0.0, 255.0, cv::NORM_MINMAX, CV_8U);
             image.convertTo(cvFrame.image, CV_8U, 255.0);
             framePub_.publish(cvFrame.toImageMsg());
-
-            /*static int counter = 0;
-            char filename[80], counterString[10];
-            std::strcpy(filename, "/home/dario/ROS/rpg_simulator_ws/images/grayscale");
-            std::sprintf(counterString, "%05d", counter++);
-            std::strcat(filename, counterString);
-            std::strcat(filename, ".png");
-
-            cv::imwrite(filename, cvFrame.image);*/
         }
 
         void EventCamera::PublishDepthmap(const EventCameraTypes::Depthmap_t& depthmap)
@@ -258,15 +249,6 @@ namespace RPGQ
             depthmapScaled.convertTo(cvDepthmap.image, CV_8U, 255.0/20.0);
             //cv::normalize(cvDepthmap.image, cvDepthmap.image, 0.0, 255.0, cv::NORM_MINMAX, CV_8U);
             depthmapPub_.publish(cvDepthmap.toImageMsg());
-
-            /*static int counter = 0;
-            char filename[80], counterString[10];
-            std::strcpy(filename, "/home/dario/ROS/rpg_simulator_ws/images/depthmap");
-            std::sprintf(counterString, "%05d", counter++);
-            std::strcat(filename, counterString);
-            std::strcat(filename, ".png");
-
-            cv::imwrite(filename, cvDepthmap.image);*/
         }
 
         void EventCamera::PublishOpticFlow(const EventCameraTypes::OpticFlow_t& opticFlow)
@@ -320,15 +302,6 @@ namespace RPGQ
             cv::cvtColor(rgb, cvOpticFlow.image, cv::COLOR_RGB2BGR);
 
             opticFlowPub_.publish(cvOpticFlow.toImageMsg());
-
-            /*static int counter = 0;
-            char filename[80], counterString[10];
-            std::strcpy(filename, "/home/dario/ROS/rpg_simulator_ws/images/opticflow");
-            std::sprintf(counterString, "%05d", counter++);
-            std::strcat(filename, counterString);
-            std::strcat(filename, ".png");
-
-            cv::imwrite(filename, cvOpticFlow.image);*/
         }
 
         void EventCamera::PublishEvents(const EventCameraTypes::Events& events)

@@ -59,7 +59,6 @@ namespace RPGQ
 
     void RGBCamera::RunSimulation_(void)
     {
-      std::cout << "Simulating RGB Camera" << std::endl;
      PublishImage();
      if (post_processing_[RGBCameraTypes::Depth])
      {
@@ -98,7 +97,6 @@ namespace RPGQ
     {
       if (!image_queue_.empty())
       {
-        std::cout << "Image queue size: " << image_queue_.size() << std::endl;
         // set lower max queue size to prevent infinite memory usage
         if (image_queue_.size() > queue_size_) image_queue_.resize(queue_size_);
         RGBCameraTypes::RGBImage_t rgb_image = image_queue_.front();
@@ -109,21 +107,7 @@ namespace RPGQ
 
         sensor_msgs::CameraInfo camera_info = GetCameraInfo(rgb_image.elapsed_useconds);
         cameraInfoPub_.publish(camera_info);
-        //
         image_queue_.pop_front();
-//
-//        static int counter = 0;
-//        counter++;
-//        if (counter >= 25)
-//        {
-//          char filename[80], counterString[10];
-//          std::strcpy(filename, "/home/sysadmin/Desktop/Images/Multi/");
-//          std::sprintf(counterString, "%05d", counter-25);
-//          std::strcat(filename, counterString);
-//          std::strcat(filename, ".png");
-//          cv::imwrite(filename, rgb_image.image);
-//        }
-
       }
     }
 
@@ -131,7 +115,6 @@ namespace RPGQ
     {
       if (!depth_queue_.empty())
       {
-        std::cout << "Depth Image queue size: " << depth_queue_.size() << std::endl;
         // set lower max queue size to prevent infinite memory usage
         if (depth_queue_.size() > queue_size_) depth_queue_.resize(queue_size_);
         RGBCameraTypes::Depthmap_t depth_map = depth_queue_.front();
@@ -140,23 +123,13 @@ namespace RPGQ
         depth_msg->header.stamp.fromNSec(1000*depth_map.elapsed_useconds);
         depthmapPub_.publish(depth_msg);
         depth_queue_.pop_front();
-//        char filename[80], counterString[10];
-
-//        static int counter = 0;
-//        std::strcpy(filename, "/home/sysadmin/Desktop/Images/Depth/");
-//        std::sprintf(counterString, "%05d", counter++);
-//        std::strcat(filename, counterString);
-//        std::strcat(filename, ".png");
-//        cv::imwrite(filename, depth_map.image);
       }
     }
 
-  //  void RGBCamera::PublishOpticFlow(const RGBCameraTypes::OpticFlow_t &optic_flow)
   void RGBCamera::PublishOpticFlow()
    {
       if (!optical_flow_queue_.empty())
       {
-        std::cout << "Optical flow image queue size: " << optical_flow_queue_.size() << std::endl;
         // set lower max queue size to prevent infinite memory usage
         if (optical_flow_queue_.size() > queue_size_) optical_flow_queue_.resize(queue_size_);
         RGBCameraTypes::OpticFlow_t opticflow_map = optical_flow_queue_.front();
@@ -172,7 +145,6 @@ namespace RPGQ
     {
       if (!obj_seg_queue_.empty())
       {
-        std::cout << "Object segmention image queue size: " << obj_seg_queue_.size() << std::endl;
         // set lower max queue size to prevent infinite memory usage
         if (obj_seg_queue_.size() > queue_size_) obj_seg_queue_.resize(queue_size_);
         RGBCameraTypes::Segement_t obj_seg = obj_seg_queue_.front();
@@ -181,14 +153,6 @@ namespace RPGQ
         obj_seg_msg->header.stamp.fromNSec(1000*obj_seg.elapsed_useconds);
         objSegmentPub_.publish(obj_seg_msg);
         obj_seg_queue_.pop_front();
-
-//        static int counter = 0;
-//        char filename[80], counterString[10];
-//        std::strcpy(filename, "/home/sysadmin/Desktop/Images/ObjSeg/");
-//        std::sprintf(counterString, "%05d", counter++);
-//        std::strcat(filename, counterString);
-//        std::strcat(filename, ".png");
-//        cv::imwrite(filename, obj_seg.image);
       }
     }
 
@@ -196,7 +160,6 @@ namespace RPGQ
     {
       if (!category_seg_queue_.empty())
       {
-        std::cout << "Category segmention image queue size: " << category_seg_queue_.size() << std::endl;
         // set lower max queue size to prevent infinite memory usage
         if (category_seg_queue_.size() > queue_size_) category_seg_queue_.resize(queue_size_);
         RGBCameraTypes::Segement_t category_seg = category_seg_queue_.front();
@@ -205,14 +168,6 @@ namespace RPGQ
         category_seg_msg->header.stamp.fromNSec(1000*category_seg.elapsed_useconds);
         categorySegmentPub_.publish(category_seg_msg);
         category_seg_queue_.pop_front();
-
-//        static int counter = 0;
-//        char filename[80], counterString[10];
-//        std::strcpy(filename, "/home/sysadmin/Desktop/Images/CatSeg/");
-//        std::sprintf(counterString, "%05d", counter++);
-//        std::strcat(filename, counterString);
-//        std::strcat(filename, ".png");
-//        cv::imwrite(filename, category_seg.image);
       }
     }
 
@@ -266,8 +221,6 @@ namespace RPGQ
         queue_mutex_.unlock();
       }
 
-      // Published in Run simulation
-      // PublishImage();
     }
 
     std::vector<std::string> RGBCamera::GetPostProcessing(void)
