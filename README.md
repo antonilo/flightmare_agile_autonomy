@@ -1,9 +1,11 @@
 # rpg_flightmare
 A quadrotor simulator that simulates rotor dynamic and quadrotor dynamics.
 
+ It simulates UAV dynamics and supports high-quality image renderering, and hardware in-the-loop control. Our goal is to make RPG Flightmare as a research platform for developing vision-based Micro Aerial Vehicles (MAVs) using optimal control strategies or reinforcement learning algorithms, we focus on enabling autonomous flight using vision and IMU as main sensor modalities.
+
 Instead of having an all-in-one simulator like AirSim, rpg_flightmare offers 
 huge modularity with its [ROS](https://www.ros.org/) based structure. New ROS 
-packages can quickly be added and all ros messages (e.g. pose, trajectory, image, post-processing images (depth, segmentation, optical-flow)) can be recorded and visualized with RVIZ. [ZMQ](https://zeromq.org/) messages add the possibility of 
+packages can quickly be added and all ROS messages (e.g. pose, trajectory, image, post-processing images (depth, segmentation, optical-flow)) can be recorded and visualized with RVIZ. [ZMQ](https://zeromq.org/) messages add the possibility of 
 using [Unity](https://unity.com/) as renderer and therefore photo-realistic 
 simulations can be generated.
 
@@ -15,7 +17,7 @@ Follow the [Usage guide](https://github.com/uzh-rpg/rpg_flightmare/wiki/Usage-Gu
 to run an example launch file.
 
 
-Here a simple example of how to spawn a drone.
+Here a simple example of how to spawn a drone in the simulator.
 
 ```cpp
 
