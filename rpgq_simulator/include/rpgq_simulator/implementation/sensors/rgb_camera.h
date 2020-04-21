@@ -45,6 +45,13 @@ namespace RPGQ
           Image_t image;
           USecs elapsed_useconds;
         };
+
+        struct OpticFlow_t
+        {
+          Image_t image;
+          USecs elapsed_useconds;
+        };
+//        unused: wrong formats (todo: delete)
 //        typedef cv::Mat_<Intensity_t> Image_t;
 //        typedef cv::Mat_<Intensity_t> Depthmap_t;
 //        typedef cv::Mat_<Intensity_t> Segement_t;
@@ -153,7 +160,7 @@ namespace RPGQ
       // publish functions
       void PublishImage();
       void PublishDepthmap();
-//      void PublishOpticFlow(const RGBCameraTypes::OpticFlow_t& optic_flow);
+      void PublishOpticFlow(); // const RGBCameraTypes::OpticFlow_t& optic_flow);
       void PublishObjSegment();
       void PublishCatSegment();
 
@@ -183,9 +190,10 @@ namespace RPGQ
 
       // image data buffer
       std::mutex queue_mutex_;
+      int queue_size_ = 1;
       std::deque<RGBCameraTypes::RGBImage_t> image_queue_;
       std::deque<RGBCameraTypes::Depthmap_t>  depth_queue_;
-//      std::deque<RGBCameraTypes::OpticFlow_t> optical_flow_queue_;
+      std::deque<RGBCameraTypes::OpticFlow_t> optical_flow_queue_;
       std::deque<RGBCameraTypes::Segement_t>  obj_seg_queue_;
       std::deque<RGBCameraTypes::Segement_t>  category_seg_queue_;
 

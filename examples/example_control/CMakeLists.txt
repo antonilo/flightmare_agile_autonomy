@@ -2,7 +2,14 @@ cmake_minimum_required(VERSION 2.8.3)
 project(example_control)
 
 find_package(catkin_simple REQUIRED)
-catkin_simple()
+catkin_simple(
+        std_msgs
+        geometry_msgs
+        nav_msgs
+        tf
+        tf_conversions
+        eigen_conversions
+)
 
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -O3")
 
@@ -19,6 +26,7 @@ cs_add_executable(single_vehicle_and_rgb_camera src/single_vehicle_and_rgb_camer
 cs_add_executable(single_vehicle_and_stereo_camera src/single_vehicle_and_stereo_camera.cpp src/trajectory/fig8_trajectory.cpp)
 cs_add_executable(multi_vehicle_and_rgb_camera src/multi_vehicle_and_rgb_camera.cpp src/trajectory/fig8_trajectory.cpp)
 cs_add_executable(single_vehicle_heading_controller src/single_vehicle_heading_controller.cpp src/heading_controller/heading_controller.cpp)
+cs_add_executable(single_vehicle_and_rgb_camera_trajectory_with_waypoints src/single_vehicle_and_rgb_camera_trajectory_with_waypoints.cpp)
 
 
 # link the executable to the necessary libraries
@@ -59,6 +67,11 @@ target_link_libraries(single_vehicle_heading_controller
         zmq
         zmqpp
         )
-
+# link the executable to the necessary libraries
+target_link_libraries(single_vehicle_and_rgb_camera_trajectory_with_waypoints
+        ${catkin_LIBRARIES}
+        zmq
+        zmqpp
+        )
 
 cs_install()

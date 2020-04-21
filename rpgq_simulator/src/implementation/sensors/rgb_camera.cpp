@@ -59,20 +59,23 @@ namespace RPGQ
 
     void RGBCamera::RunSimulation_(void)
     {
-//       std::cout << "Simulating RGB Camera" << std::endl;
-//      PublishImage();
-//      if (post_processing_[RGBCameraTypes::Depth])
-//      {
-//        PublishDepthmap();
-//      }
-//      if (post_processing_[RGBCameraTypes::ObjectSegment])
-//      {
-//        PublishObjSegment();
-//      }
-//      if (post_processing_[RGBCameraTypes::CategorySegment])
-//      {
-//        PublishCatSegment();
-//      }
+     PublishImage();
+     if (post_processing_[RGBCameraTypes::Depth])
+     {
+       PublishDepthmap();
+     }
+     if (post_processing_[RGBCameraTypes::ObjectSegment])
+     {
+       PublishObjSegment();
+     }
+     if (post_processing_[RGBCameraTypes::CategorySegment])
+     {
+       PublishCatSegment();
+     }
+     if (post_processing_[RGBCameraTypes::OpticalFlow])
+     {
+       PublishOpticFlow();
+     }
     }
 
     USecs RGBCamera::UpdateSamplingInterval(void)
@@ -85,12 +88,17 @@ namespace RPGQ
       imgPub_.shutdown();
       depthmapPub_.shutdown();
       opticFlowPub_.shutdown();
+      categorySegmentPub_.shutdown();
+      objSegmentPub_.shutdown();
+      cameraInfoPub_.shutdown();
     }
 
     void RGBCamera::PublishImage()
     {
       if (!image_queue_.empty())
       {
+        // set lower max queue size to prevent infinite memory usage
+        if (image_queue_.size() > queue_size_) image_queue_.resize(queue_size_);
         RGBCameraTypes::RGBImage_t rgb_image = image_queue_.front();
         sensor_msgs::ImagePtr img_msg = cv_bridge::CvImage(std_msgs::Header(),
           "bgr8", rgb_image.image).toImageMsg();
@@ -99,21 +107,7 @@ namespace RPGQ
 
         sensor_msgs::CameraInfo camera_info = GetCameraInfo(rgb_image.elapsed_useconds);
         cameraInfoPub_.publish(camera_info);
-        //
         image_queue_.pop_front();
-//
-//        static int counter = 0;
-//        counter++;
-//        if (counter >= 25)
-//        {
-//          char filename[80], counterString[10];
-//          std::strcpy(filename, "/home/sysadmin/Desktop/Images/Multi/");
-//          std::sprintf(counterString, "%05d", counter-25);
-//          std::strcat(filename, counterString);
-//          std::strcat(filename, ".png");
-//          cv::imwrite(filename, rgb_image.image);
-//        }
-
       }
     }
 
@@ -121,46 +115,44 @@ namespace RPGQ
     {
       if (!depth_queue_.empty())
       {
+        // set lower max queue size to prevent infinite memory usage
+        if (depth_queue_.size() > queue_size_) depth_queue_.resize(queue_size_);
         RGBCameraTypes::Depthmap_t depth_map = depth_queue_.front();
         sensor_msgs::ImagePtr depth_msg = cv_bridge::CvImage(std_msgs::Header(),
           "bgr8", depth_map.image).toImageMsg();
         depth_msg->header.stamp.fromNSec(1000*depth_map.elapsed_useconds);
         depthmapPub_.publish(depth_msg);
         depth_queue_.pop_front();
-//        char filename[80], counterString[10];
-
-//        static int counter = 0;
-//        std::strcpy(filename, "/home/sysadmin/Desktop/Images/Depth/");
-//        std::sprintf(counterString, "%05d", counter++);
-//        std::strcat(filename, counterString);
-//        std::strcat(filename, ".png");
-//        cv::imwrite(filename, depth_map.image);
       }
     }
 
-//    void RGBCamera::PublishOpticFlow(const RGBCameraTypes::OpticFlow_t &optic_flow)
-//    {
-//
-//    }
+  void RGBCamera::PublishOpticFlow()
+   {
+      if (!optical_flow_queue_.empty())
+      {
+        // set lower max queue size to prevent infinite memory usage
+        if (optical_flow_queue_.size() > queue_size_) optical_flow_queue_.resize(queue_size_);
+        RGBCameraTypes::OpticFlow_t opticflow_map = optical_flow_queue_.front();
+        sensor_msgs::ImagePtr opticflow_msg = cv_bridge::CvImage(std_msgs::Header(),
+          "bgr8", opticflow_map.image).toImageMsg();
+        opticflow_msg->header.stamp.fromNSec(1000*opticflow_map.elapsed_useconds);
+        opticFlowPub_.publish(opticflow_msg);
+        optical_flow_queue_.pop_front();
+      }
+   }
 
     void RGBCamera::PublishObjSegment()
     {
       if (!obj_seg_queue_.empty())
       {
+        // set lower max queue size to prevent infinite memory usage
+        if (obj_seg_queue_.size() > queue_size_) obj_seg_queue_.resize(queue_size_);
         RGBCameraTypes::Segement_t obj_seg = obj_seg_queue_.front();
         sensor_msgs::ImagePtr obj_seg_msg = cv_bridge::CvImage(std_msgs::Header(),
           "bgr8", obj_seg.image).toImageMsg();
         obj_seg_msg->header.stamp.fromNSec(1000*obj_seg.elapsed_useconds);
         objSegmentPub_.publish(obj_seg_msg);
         obj_seg_queue_.pop_front();
-
-//        static int counter = 0;
-//        char filename[80], counterString[10];
-//        std::strcpy(filename, "/home/sysadmin/Desktop/Images/ObjSeg/");
-//        std::sprintf(counterString, "%05d", counter++);
-//        std::strcat(filename, counterString);
-//        std::strcat(filename, ".png");
-//        cv::imwrite(filename, obj_seg.image);
       }
     }
 
@@ -168,20 +160,14 @@ namespace RPGQ
     {
       if (!category_seg_queue_.empty())
       {
+        // set lower max queue size to prevent infinite memory usage
+        if (category_seg_queue_.size() > queue_size_) category_seg_queue_.resize(queue_size_);
         RGBCameraTypes::Segement_t category_seg = category_seg_queue_.front();
         sensor_msgs::ImagePtr category_seg_msg = cv_bridge::CvImage(std_msgs::Header(),
           "bgr8", category_seg.image).toImageMsg();
         category_seg_msg->header.stamp.fromNSec(1000*category_seg.elapsed_useconds);
         categorySegmentPub_.publish(category_seg_msg);
         category_seg_queue_.pop_front();
-
-//        static int counter = 0;
-//        char filename[80], counterString[10];
-//        std::strcpy(filename, "/home/sysadmin/Desktop/Images/CatSeg/");
-//        std::sprintf(counterString, "%05d", counter++);
-//        std::strcat(filename, counterString);
-//        std::strcat(filename, ".png");
-//        cv::imwrite(filename, category_seg.image);
       }
     }
 
@@ -206,13 +192,15 @@ namespace RPGQ
         queue_mutex_.unlock();
       }
 
-//      if (post_processing_[RGBCameraTypes::OpticalFlow])
-//      {
-//        queue_mutex_.lock();
-//        RGBCameraTypes::OpticFlow_t optical_flow_image = images[RGBCameraTypes::OpticalFlow];
-//        optical_flow_queue_.push_back(optical_flow_image);
-//        queue_mutex_.unlock();
-//      }
+     if (post_processing_[RGBCameraTypes::OpticalFlow])
+     {
+       queue_mutex_.lock();
+       RGBCameraTypes::OpticFlow_t optical_flow_image;
+       optical_flow_image.image = images[RGBCameraTypes::OpticalFlow];
+       optical_flow_image.elapsed_useconds = ROSTIME_TO_USECS(img_timestamp);
+       optical_flow_queue_.push_back(optical_flow_image);
+       queue_mutex_.unlock();
+     }
 
       if (post_processing_[RGBCameraTypes::ObjectSegment])
       {
@@ -233,8 +221,6 @@ namespace RPGQ
         queue_mutex_.unlock();
       }
 
-      //
-      PublishImage();
     }
 
     std::vector<std::string> RGBCamera::GetPostProcessing(void)
