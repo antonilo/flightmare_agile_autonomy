@@ -37,8 +37,10 @@ int main(int argc, char * argv[])
   // set the relative position of the camera with respect to quadrotor center mass
   Eigen::Vector3d B_r_BC(0.0, 0.5, 0.0);
   // set the relative rotation of the camera
-  Eigen::Matrix3d R_BC = Eigen::AngleAxisd(1.7177715175,
-    Eigen::Vector3d(-0.862856209461017,0.357406744336593,-0.357406744336593)).toRotationMatrix();
+  Eigen::Matrix3d R_BC;
+  R_BC << 1.0, 0.0, 0.0,
+          0.0, 1.0, 0.0,
+          0.0, 0.0, 1.0;
   rgb_camera->SetRelPose(B_r_BC, R_BC);
   
   // configure the quadrotor
