@@ -206,13 +206,9 @@ void Simulator::SetCommandSet(const rpgq_msgs::CommandSet &cmdSet) {
 
 void Simulator::SetFlightmare(const bool & on) {
   if (on) {
-    std::cout << on << std::endl;
     flightmareBridge_ = FlightmareBridge::getInstance();
     flightmareBridge_->initializeConnections();
   } 
-  // else {
-  //   flightmareBridge_.reset();
-  // }
 }
 
 // optitrack

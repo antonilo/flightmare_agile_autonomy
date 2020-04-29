@@ -8,16 +8,12 @@
 
     <node name="rpgg_flightmare_Renderer" pkg="rpgq_simulator" type="RPG_FLIGHTMARE.x86_64" unless="$(arg editor)"/>
 
-    <node name="simulator" pkg="example_control" type="multi_vehicle_and_rgb_camera" output="screen" launch-prefix="gdb -ex run --args" if="$(arg debug)" >
+    <node name="simulator" pkg="example_control" type="multi_quad_with_camera" output="screen" launch-prefix="gdb -ex run --args" if="$(arg debug)" >
         <param name="scene_name" value="$(arg scene_name)" />
     </node>
-    <node name="simulator" pkg="example_control" type="multi_vehicle_and_rgb_camera" output="screen" unless="$(arg debug)">
+    <node name="simulator" pkg="example_control" type="multi_quad_with_camera" output="screen" unless="$(arg debug)">
         <param name="scene_name" value="$(arg scene_name)" />
     </node>
 
-    <node type="rviz" name="rviz" pkg="rviz" args="-d $(find example_control)/rviz/multi_vehicle_with_rgb_camera.rviz" />
-
-
-
-
+    <node type="rviz" name="rviz" pkg="rviz" args="-d $(find example_control)/rviz/multi_quad_with_camera.rviz" />
 </launch>

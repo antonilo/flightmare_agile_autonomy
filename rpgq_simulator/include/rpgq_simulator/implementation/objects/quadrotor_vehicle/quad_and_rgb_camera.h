@@ -31,6 +31,21 @@ namespace RPGQ
       const std::shared_ptr<RGBCamera> GetRGBCamera(void)
         {return rgbCameraPtr_;};
 
+      void EnableDepth(const bool & on) 
+        {rgbCameraPtr_->EnableDepth(on); };
+      void EnableOpticalFlow(const bool & on)
+        {rgbCameraPtr_->EnableOpticalFlow(on); };
+      void EnableObjectSegment(const bool & on)
+        {rgbCameraPtr_->EnableObjectSegment(on); };
+      void EnableCategorySegment(const bool & on)
+        {rgbCameraPtr_->EnableCategorySegment(on); };
+      void SetWidth(const int & width) 
+        {rgbCameraPtr_->SetWidth(width); };
+      void SetHeight(const int & height) 
+        {rgbCameraPtr_->SetHeight(height); };
+      void SetFov(const double & fov) 
+        {rgbCameraPtr_->SetFov(fov); };
+
      private:
       // (user defined) mediators
       void ChildrenMediator(void) {};

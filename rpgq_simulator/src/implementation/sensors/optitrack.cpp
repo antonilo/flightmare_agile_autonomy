@@ -42,7 +42,6 @@ namespace RPGQ
             header.stamp.fromNSec(1000*timer_.ElapsedUSeconds());
             header.seq = frameCounter_++;
 
-            std::cout << objects_.size() ;
             for (const auto & obj : objects_)
             {
                 ObjectID obj_id = obj.first;

@@ -51,11 +51,6 @@ namespace RPGQ
           Image_t image;
           USecs elapsed_useconds;
         };
-//        unused: wrong formats (todo: delete)
-//        typedef cv::Mat_<Intensity_t> Image_t;
-//        typedef cv::Mat_<Intensity_t> Depthmap_t;
-//        typedef cv::Mat_<Intensity_t> Segement_t;
-//        typedef cv::Mat_<cv::Vec<Intensity_t, 2>> OpticFlow_t;
 
         typedef Eigen::Matrix4d Mat4_t;
         typedef Eigen::Vector3d Vec3_t;
@@ -129,6 +124,9 @@ namespace RPGQ
       std::vector<std::string> GetPostProcessing(void);
       sensor_msgs::CameraInfo GetCameraInfo(const USecs & elapsed_useconds);
 
+      // 
+      void GetRGBImage(cv::Mat & rgb_img);
+      
       // public set functions
       void SetChanel(const int & channels) { channels_ = channels;};
       void SetWidth(const int & width) {width_ = width; };

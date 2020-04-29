@@ -5,24 +5,24 @@
   <description>Example simulator with multiple quadrotor.</description>
   <license>TODO</license>
 
-  <maintainer email="brescianini@ifi.uzh.ch">Dario Brescianini, Yunlong Song</maintainer>
+  <maintainer email="song@ifi.uzh.ch">Yunlong Song</maintainer>
 
   <buildtool_depend>catkin</buildtool_depend>
   <buildtool_depend>catkin_simple</buildtool_depend>
 
-    <depend>autopilot</depend>
-    <depend>rpg_rotors_interface</depend>
-    <depend>roscpp</depend>
-    <depend>rpgq_common</depend>
-    <depend>rpgq_simulator</depend>
-    <depend>quadrotor_common</depend>
-    <depend>quadrotor_msgs</depend>
-    <depend>polynomial_trajectories</depend>
-    <depend>std_msgs</depend>
-    <depend>geometry_msgs</depend>
-    <depend>nav_msgs</depend>
-    <depend>tf</depend>
-    <depend>tf_conversions</depend>
-    <depend>eigen_conversions</depend>
+  <depend>autopilot</depend>
+  <depend>rpg_rotors_interface</depend>
+  <depend>roscpp</depend>
+  <depend>rpgq_common</depend>
+  <depend>rpgq_simulator</depend>
+  <depend>quadrotor_common</depend>
+  <depend>quadrotor_msgs</depend>
+  <depend>polynomial_trajectories</depend>
+  <depend>std_msgs</depend>
+  <depend>geometry_msgs</depend>
+  <depend>nav_msgs</depend>
+  <depend>tf</depend>
+  <depend>tf_conversions</depend>
+  <depend>eigen_conversions</depend>
 
 </package>

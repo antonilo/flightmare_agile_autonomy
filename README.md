@@ -9,7 +9,7 @@ packages can quickly be added and all ROS messages (e.g. pose, trajectory, image
 using [Unity](https://unity.com/) as renderer and therefore photo-realistic 
 simulations can be generated.
 
-![](images/readme_rviz.png)
+![](docs/images/readme_rviz.png)
 
 # Usage
 

@@ -12,15 +12,6 @@ namespace RPGQ
       Parameters<NUM_PARAMS> params):
       BaseSensor(id, prevSimNode, SECS_TO_USECS(1.0/params.GetDouble(RGBCamera::updateFrequency)))
     {
-      // set up publisher
-      image_transport::ImageTransport it(pnh_);
-      imgPub_ = it.advertise(GetSimTreePath(simNode_) + "/image", 1);
-      depthmapPub_ = it.advertise(GetSimTreePath(simNode_) + "/depth", 1);
-      opticFlowPub_ = it.advertise(GetSimTreePath(simNode_) + "/optical_flow", 1);
-      objSegmentPub_ = it.advertise(GetSimTreePath(simNode_) + "/object_segment", 1);
-      categorySegmentPub_ = it.advertise(GetSimTreePath(simNode_) + "/category_segment", 1);
-      cameraInfoPub_ = pnh_.advertise<sensor_msgs::CameraInfo>(GetSimTreePath(simNode_) + "/camera_info", 1);
-
       // general rbg camera variables
       channels_ = params.GetInt(RGBCamera::channels);
       width_ = params.GetInt(RGBCamera::width);
@@ -95,28 +86,43 @@ namespace RPGQ
 
     void RGBCamera::PublishImage()
     {
+      if (!imgPub_) {
+        image_transport::ImageTransport it(pnh_);
+        imgPub_ = it.advertise(GetSimTreePath(simNode_) + "/image", 1);
+        cameraInfoPub_ = pnh_.advertise<sensor_msgs::CameraInfo>(GetSimTreePath(simNode_) + "/camera_info", 1);
+      }
       if (!image_queue_.empty())
       {
-        // set lower max queue size to prevent infinite memory usage
-        if (image_queue_.size() > queue_size_) image_queue_.resize(queue_size_);
         RGBCameraTypes::RGBImage_t rgb_image = image_queue_.front();
         sensor_msgs::ImagePtr img_msg = cv_bridge::CvImage(std_msgs::Header(),
           "bgr8", rgb_image.image).toImageMsg();
         img_msg->header.stamp.fromNSec(1000*rgb_image.elapsed_useconds);
         imgPub_.publish(img_msg);
-
         sensor_msgs::CameraInfo camera_info = GetCameraInfo(rgb_image.elapsed_useconds);
         cameraInfoPub_.publish(camera_info);
         image_queue_.pop_front();
       }
     }
 
+    void RGBCamera::GetRGBImage(cv::Mat & rgb_img)
+    {
+      if (!image_queue_.empty())
+      {
+        RGBCameraTypes::RGBImage_t rgb_image = image_queue_.front();
+        // not sure if this is the most efficient way to retrieve images.
+        rgb_img = rgb_image.image;
+        image_queue_.pop_front();
+      }
+    }
+
     void RGBCamera::PublishDepthmap()
     {
+      if (!imgPub_) {
+        image_transport::ImageTransport it(pnh_);
+        depthmapPub_ = it.advertise(GetSimTreePath(simNode_) + "/depth", 1);
+      }
       if (!depth_queue_.empty())
       {
-        // set lower max queue size to prevent infinite memory usage
-        if (depth_queue_.size() > queue_size_) depth_queue_.resize(queue_size_);
         RGBCameraTypes::Depthmap_t depth_map = depth_queue_.front();
         sensor_msgs::ImagePtr depth_msg = cv_bridge::CvImage(std_msgs::Header(),
           "bgr8", depth_map.image).toImageMsg();
@@ -128,10 +134,12 @@ namespace RPGQ
 
   void RGBCamera::PublishOpticFlow()
    {
+      if (!imgPub_) {
+        image_transport::ImageTransport it(pnh_);
+        opticFlowPub_ = it.advertise(GetSimTreePath(simNode_) + "/optical_flow", 1);
+      }
       if (!optical_flow_queue_.empty())
       {
-        // set lower max queue size to prevent infinite memory usage
-        if (optical_flow_queue_.size() > queue_size_) optical_flow_queue_.resize(queue_size_);
         RGBCameraTypes::OpticFlow_t opticflow_map = optical_flow_queue_.front();
         sensor_msgs::ImagePtr opticflow_msg = cv_bridge::CvImage(std_msgs::Header(),
           "bgr8", opticflow_map.image).toImageMsg();
@@ -143,10 +151,12 @@ namespace RPGQ
 
     void RGBCamera::PublishObjSegment()
     {
+      if (!imgPub_) {
+        image_transport::ImageTransport it(pnh_);
+        objSegmentPub_ = it.advertise(GetSimTreePath(simNode_) + "/object_segment", 1);
+      }
       if (!obj_seg_queue_.empty())
       {
-        // set lower max queue size to prevent infinite memory usage
-        if (obj_seg_queue_.size() > queue_size_) obj_seg_queue_.resize(queue_size_);
         RGBCameraTypes::Segement_t obj_seg = obj_seg_queue_.front();
         sensor_msgs::ImagePtr obj_seg_msg = cv_bridge::CvImage(std_msgs::Header(),
           "bgr8", obj_seg.image).toImageMsg();
@@ -158,10 +168,12 @@ namespace RPGQ
 
     void RGBCamera::PublishCatSegment()
     {
+      if (!imgPub_) {
+        image_transport::ImageTransport it(pnh_);
+        categorySegmentPub_ = it.advertise(GetSimTreePath(simNode_) + "/category_segment", 1);
+      }
       if (!category_seg_queue_.empty())
       {
-        // set lower max queue size to prevent infinite memory usage
-        if (category_seg_queue_.size() > queue_size_) category_seg_queue_.resize(queue_size_);
         RGBCameraTypes::Segement_t category_seg = category_seg_queue_.front();
         sensor_msgs::ImagePtr category_seg_msg = cv_bridge::CvImage(std_msgs::Header(),
           "bgr8", category_seg.image).toImageMsg();
@@ -179,6 +191,8 @@ namespace RPGQ
         RGBCameraTypes::RGBImage_t rgb_image;
         rgb_image.image = images[RGBCameraTypes::RGB];
         rgb_image.elapsed_useconds = ROSTIME_TO_USECS(img_timestamp);
+        // set lower max queue size to prevent infinite memory usage
+        if (image_queue_.size() > queue_size_) image_queue_.resize(queue_size_);
         image_queue_.push_back(rgb_image);
         queue_mutex_.unlock();
       }
@@ -188,6 +202,8 @@ namespace RPGQ
         RGBCameraTypes::Depthmap_t depth_image;
         depth_image.image = images[RGBCameraTypes::Depth];
         depth_image.elapsed_useconds = ROSTIME_TO_USECS(img_timestamp);
+        // set lower max queue size to prevent infinite memory usage
+        if (depth_queue_.size() > queue_size_) depth_queue_.resize(queue_size_);
         depth_queue_.push_back(depth_image);
         queue_mutex_.unlock();
       }
@@ -198,6 +214,8 @@ namespace RPGQ
        RGBCameraTypes::OpticFlow_t optical_flow_image;
        optical_flow_image.image = images[RGBCameraTypes::OpticalFlow];
        optical_flow_image.elapsed_useconds = ROSTIME_TO_USECS(img_timestamp);
+       // set lower max queue size to prevent infinite memory usage
+       if (optical_flow_queue_.size() > queue_size_) optical_flow_queue_.resize(queue_size_);
        optical_flow_queue_.push_back(optical_flow_image);
        queue_mutex_.unlock();
      }
@@ -208,6 +226,8 @@ namespace RPGQ
         RGBCameraTypes::Segement_t obj_seg_image;
         obj_seg_image.image = images[RGBCameraTypes::ObjectSegment];
         obj_seg_image.elapsed_useconds = ROSTIME_TO_USECS(img_timestamp);
+        // set lower max queue size to prevent infinite memory usage
+        if (obj_seg_queue_.size() > queue_size_) obj_seg_queue_.resize(queue_size_);
         obj_seg_queue_.push_back(obj_seg_image);
         queue_mutex_.unlock();
       }
@@ -217,6 +237,8 @@ namespace RPGQ
         RGBCameraTypes::Segement_t category_seg_image;
         category_seg_image.image = images[RGBCameraTypes::CategorySegment];
         category_seg_image.elapsed_useconds = ROSTIME_TO_USECS(img_timestamp);
+        // set lower max queue size to prevent infinite memory usage
+        if (category_seg_queue_.size() > queue_size_) category_seg_queue_.resize(queue_size_);
         category_seg_queue_.push_back(category_seg_image);
         queue_mutex_.unlock();
       }

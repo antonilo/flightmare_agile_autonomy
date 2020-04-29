@@ -6,19 +6,21 @@
   <license>TODO</license>
 
   <maintainer email="brescianini@ifi.uzh.ch">Dario Brescianini</maintainer>
+  <maintainer email="song@ifi.uzh.ch">Yunlong Song</maintainer>
 
   <buildtool_depend>catkin</buildtool_depend>
   <buildtool_depend>catkin_simple</buildtool_depend>
   
   <depend>roscpp</depend>
   <depend>cv_bridge</depend>
-  <depend>dvs_msgs</depend>
   <depend>geometry_msgs</depend>
   <depend>rosgraph_msgs</depend>
   <depend>rpgq_msgs</depend>
   <depend>sensor_msgs</depend>
   <depend>image_transport</depend>
   <depend>assimp_catkin</depend>
+  
+  <!-- RPGQ  -->
   <depend>rpgq_common</depend>
   <depend>rpgq_components</depend>
   <depend>rpgq_command_bridge</depend>

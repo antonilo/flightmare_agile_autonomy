@@ -1,7 +1,7 @@
 #include <rpgq_simulator/implementation/sensors/event_camera.h>
 
 // ros
-#include <dvs_msgs/EventArray.h>
+#include <rpgq_msgs/EventArray.h>
 #include <cv_bridge/cv_bridge.h>
 
 // standard library
@@ -57,7 +57,7 @@ namespace RPGQ
             framePub_ = it.advertise(GetSimTreePath(simNode_) + "/frame", 1);
             depthmapPub_ = it.advertise(GetSimTreePath(simNode_) + "/depthmap", 1);
             opticFlowPub_ = it.advertise(GetSimTreePath(simNode_) + "/optic_flow", 1);
-            eventsPub_ = pnh_.advertise<dvs_msgs::EventArray>(GetSimTreePath(simNode_) + "/events", 0);
+            eventsPub_ = pnh_.advertise<rpgq_msgs::EventArray>(GetSimTreePath(simNode_) + "/events", 0);
             cameraInfoPub_ = pnh_.advertise<sensor_msgs::CameraInfo>(GetSimTreePath(simNode_) + "/camera_info", 1);
 
             const cv::Size size = cv::Size(imageWidth_,imageHeight_);
@@ -308,14 +308,14 @@ namespace RPGQ
         {
             if (events.empty()) return;
             
-            dvs_msgs::EventArrayPtr msg;
-            msg.reset(new dvs_msgs::EventArray);
+            rpgq_msgs::EventArrayPtr msg;
+            msg.reset(new rpgq_msgs::EventArray);
 
             msg->height = imageSize_.height;
             msg->width = imageSize_.width;
             for (const auto & event : events)
             {
-                dvs_msgs::Event e;
+                rpgq_msgs::Event e;
                 e.x = event.x;
                 e.y = event.y;
                 e.ts.fromNSec(event.t);

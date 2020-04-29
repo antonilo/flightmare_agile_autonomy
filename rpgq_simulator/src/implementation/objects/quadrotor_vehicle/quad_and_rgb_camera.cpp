@@ -28,9 +28,9 @@ namespace RPGQ
                                       std::bind(&QuadrotorDynamics::GetQuat, quadPtr_->GetDynamics()),
                                       std::bind(&QuadrotorDynamics::GetOmega, quadPtr_->GetDynamics()));
       Eigen::Vector3d B_r_BC(0.0, 0.5, 0.0);
-//       forward looking between (B_e_X and B_e_Y)
-//       Eigen::Matrix3d R_BC = Eigen::AngleAxisd(1.7177715175,
-//          Eigen::Vector3d(-0.862856209461017,0.357406744336593,-0.357406744336593)).toRotationMatrix();
+      // forward looking between (B_e_X and B_e_Y)
+      // Eigen::Matrix3d R_BC = Eigen::AngleAxisd(1.7177715175,
+      //  Eigen::Vector3d(-0.862856209461017,0.357406744336593,-0.357406744336593)).toRotationMatrix();
       Eigen::Matrix3d R_BC;
       R_BC << 1.0, 0.0, 0.0,
               0.0, 1.0, 0.0,
