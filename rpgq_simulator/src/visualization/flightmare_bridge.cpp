@@ -211,7 +211,7 @@ void FlightmareBridge::addObject(std::shared_ptr<UnityObject> obj) {
 }
 
 // public get functions
-void FlightmareBridge::getRender(const FlightmareTypes::USecs & ntime) {
+void FlightmareBridge::getRender(const FlightmareTypes::ImgID & ntime) {
   pub_msg_.ntime = ntime;
   for(size_t idx=0; idx < pub_msg_.vehicles.size(); idx++)
   {
@@ -286,7 +286,7 @@ bool FlightmareBridge::handleSettings() {
   return done;
 }
 
-void FlightmareBridge::handleOutput(RenderMessage_t & output) {
+FlightmareTypes::ImgID FlightmareBridge::handleOutput(RenderMessage_t & output) {
   // create new message object
   zmqpp::message msg;
   sub_.receive(msg);
@@ -370,6 +370,8 @@ void FlightmareBridge::handleOutput(RenderMessage_t & output) {
       rgb_camera->FeedImageQueue(timestamp, images);
     }
   }
+  //
+  return sub_msg.ntime;
 }
 
 } // namespace Simulator

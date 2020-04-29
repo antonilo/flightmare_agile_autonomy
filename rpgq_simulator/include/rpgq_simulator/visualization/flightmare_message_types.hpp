@@ -27,6 +27,7 @@ namespace RPGQ
   namespace FlightmareTypes
   {
     typedef uint64_t USecs;
+    typedef uint64_t ImgID;
 
     typedef size_t SceneID;
     const SceneID SCENE_WAREHOUSE = 0;

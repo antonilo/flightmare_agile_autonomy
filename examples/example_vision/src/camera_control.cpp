@@ -66,7 +66,7 @@ int main(int argc, char * argv[])
   // connect to unity. 
   // please open the Unity3D standalone. 
   double time_out_count = 0;
-  double sleep_useconds = 1e5;
+  double sleep_useconds = 0.2 * 1e5;
   const double connection_time_out = 10.0; // seconds
   while (!flightmare_ready)
   {
@@ -87,7 +87,7 @@ int main(int argc, char * argv[])
     time_out_count += sleep_useconds;
   }
   
-  FlightmareTypes::USecs  dt_dummy = 0;
+  FlightmareTypes::ImgID  img_id = 0;
   
   cv::Mat rgb_img;
   for (int i=0; i< 100; i++){
@@ -97,19 +97,31 @@ int main(int argc, char * argv[])
     quad->SetPos(quad_position);
     quad->SetQuat(Eigen::Quaterniond(std::cos(0.5*M_PI_2),0.0,0.0,std::sin(0.5*M_PI_2)));
     
+    img_id = i;
+    std::cout << "send img_id: " << img_id << std::endl;
     // send message to unity (e.g., update quadrotor pose)
-    flightmareBridge_ptr->getRender(dt_dummy);
+    flightmareBridge_ptr->getRender(img_id);
+
+    // wait a bit for Unity simulation
+    // Unfortunately, it is difficult to say how long should 
+    // you wait until Unity finish rendering...
+    usleep(sleep_useconds);
 
     // receive message update from Unity3D (e.g. receive image)
-    flightmareBridge_ptr->handleOutput(unity_output);
-
+    FlightmareTypes::ImgID receive_id;
+    receive_id = flightmareBridge_ptr->handleOutput(unity_output);
+    std::cout << "receive img_id: " << receive_id << std::endl;
+    
     // not sure if this is the most efficient way to retrieve images.
     rgb_camera->GetRGBImage(rgb_img);
 
     //
-    cv::imshow("rgb_img", rgb_img);
-    cv::waitKey(0);
-    // usleep(sleep_useconds);
+    
+    std::string file_path = std::string(getenv("RPGQ_PARAM_DIR")) + std::string("/examples/example_vision/src/saved_image/");
+    std::string img_string = std::to_string(img_id) + ".png";
+    std::string file_name = file_path + img_string;
+    cv::imwrite(file_name, rgb_img);
+    // cv::waitKey(0);
   }
  return 0;
 }

@@ -48,8 +48,8 @@ class FlightmareBridge {
     void disconnectUnity();
     
     // public get functions
-    void getRender(const FlightmareTypes::USecs & ntime);
-    void handleOutput(RenderMessage_t & output);
+    void getRender(const FlightmareTypes::ImgID & ntime);
+    FlightmareTypes::ImgID handleOutput(RenderMessage_t & output);
 
     static std::shared_ptr<FlightmareBridge> getInstance(void) {
       static std::shared_ptr<FlightmareBridge> fmb = std::make_shared<FlightmareBridge>();
