@@ -27,10 +27,6 @@ int main(int argc, char * argv[])
   
   // configure the camera
   std::shared_ptr<Simulator::RGBCamera> rgb_camera = quad_rgb->GetRGBCamera();
-  // rgb_camera->EnableOpticalFlow(true);       // default is false
-  // rgb_camera->EnableDepth(true);
-  // rgb_camera->EnableObjectSegment(true);
-  // rgb_camera->EnableCategorySegment(true);
   rgb_camera->SetWidth(320);
   rgb_camera->SetHeight(240);
 
@@ -51,6 +47,7 @@ int main(int argc, char * argv[])
   quad->SetSize(Eigen::Vector3d(1, 1, 1));
   
   // flightmare
+  // FlightmareTypes::SceneID scene_id = FlightmareTypes::SCENE_NATUREFOREST;
   FlightmareTypes::SceneID scene_id = FlightmareTypes::SCENE_WAREHOUSE;
   bool flightmare_ready{false};
   Simulator::RenderMessage_t unity_output;
@@ -86,42 +83,49 @@ int main(int argc, char * argv[])
     // increase time out counter
     time_out_count += sleep_useconds;
   }
+
+  // wait 1 seconds. until to environment is fully loaded.
+  usleep(1*1e6);
   
-  FlightmareTypes::ImgID  img_id = 0;
-  
+  FlightmareTypes::ImgID  send_id = 0;
+  FlightmareTypes::ImgID receive_id = 0;
+
   cv::Mat rgb_img;
-  for (int i=0; i< 100; i++){
-    quad_position << 0, 0, float(i);
-    // change the quadrotor position and rotation.
-    // the camera pos will be changed implicitly
-    quad->SetPos(quad_position);
-    quad->SetQuat(Eigen::Quaterniond(std::cos(0.5*M_PI_2),0.0,0.0,std::sin(0.5*M_PI_2)));
+  while (true) {
     
-    img_id = i;
-    std::cout << "send img_id: " << img_id << std::endl;
-    // send message to unity (e.g., update quadrotor pose)
-    flightmareBridge_ptr->getRender(img_id);
+    // Ideally, send_id (pos) == receive_id (image); 
+    if (receive_id == send_id) {
+      send_id += 1;
+      //
+      // change the quadrotor position and rotation.
+      // the camera pos will be changed implicitly
+      quad_position << 0, 0, float(send_id)*0.2;
+      quad->SetPos(quad_position);
+      quad->SetQuat(Eigen::Quaterniond(std::cos(0.5*M_PI_2),0.0,0.0,std::sin(0.5*M_PI_2)));
 
-    // wait a bit for Unity simulation
-    // Unfortunately, it is difficult to say how long should 
-    // you wait until Unity finish rendering...
-    usleep(sleep_useconds);
-
+      // send message to unity (e.g., update quadrotor pose)
+      // cannot request image / send camera pose too fast.
+      // it takes some time to render images...
+      std::cout << "send pose ID: " << send_id << std::endl; 
+      flightmareBridge_ptr->getRender(send_id);
+    }
+    
     // receive message update from Unity3D (e.g. receive image)
-    FlightmareTypes::ImgID receive_id;
     receive_id = flightmareBridge_ptr->handleOutput(unity_output);
-    std::cout << "receive img_id: " << receive_id << std::endl;
+    std::cout << "receive image ID: " << receive_id << std::endl;
     
-    // not sure if this is the most efficient way to retrieve images.
+    // 
     rgb_camera->GetRGBImage(rgb_img);
 
     //
-    
     std::string file_path = std::string(getenv("RPGQ_PARAM_DIR")) + std::string("/examples/example_vision/src/saved_image/");
-    std::string img_string = std::to_string(img_id) + ".png";
+    std::string img_string = std::to_string(receive_id) + ".png";
     std::string file_name = file_path + img_string;
     cv::imwrite(file_name, rgb_img);
-    // cv::waitKey(0);
+
+    if (send_id >= 100)
+      break;
   }
+
  return 0;
 }

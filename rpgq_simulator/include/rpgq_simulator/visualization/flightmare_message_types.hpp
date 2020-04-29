@@ -31,7 +31,7 @@ namespace RPGQ
 
     typedef size_t SceneID;
     const SceneID SCENE_WAREHOUSE = 0;
-    const SceneID SCENE_NATUREFOREST = 1;
+    const SceneID SCENE_NATUREFOREST = 3;
   }
 
   namespace Simulator
