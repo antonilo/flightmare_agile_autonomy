@@ -132,6 +132,16 @@ namespace RPGQ
       }
     }
 
+    void RGBCamera::GetDepthmap(cv::Mat & depth_map)
+    {
+      if (!depth_queue_.empty())
+      {
+        RGBCameraTypes::Depthmap_t depth_image = depth_queue_.front();
+        depth_map = depth_image.image;
+        depth_queue_.pop_front();
+      }
+    }
+
   void RGBCamera::PublishOpticFlow()
    {
       if (!imgPub_) {
@@ -148,6 +158,16 @@ namespace RPGQ
         optical_flow_queue_.pop_front();
       }
    }
+
+  void RGBCamera::GetOpticalFlow(cv::Mat & optical_flow)
+  {
+    if (!optical_flow_queue_.empty())
+    {
+      RGBCameraTypes::OpticFlow_t opticflow_map = optical_flow_queue_.front();
+      optical_flow = opticflow_map.image;
+      optical_flow_queue_.pop_front();
+    }
+  }
 
     void RGBCamera::PublishObjSegment()
     {
@@ -166,6 +186,16 @@ namespace RPGQ
       }
     }
 
+  void RGBCamera::GetObjSegment(cv::Mat & obj_segment)
+  {
+    if (!obj_seg_queue_.empty())
+    {
+      RGBCameraTypes::Segement_t obj_seg = obj_seg_queue_.front();
+      obj_segment = obj_seg.image;
+      obj_seg_queue_.pop_front();
+    }
+  }
+
     void RGBCamera::PublishCatSegment()
     {
       if (!imgPub_) {
@@ -183,6 +213,16 @@ namespace RPGQ
       }
     }
 
+    void RGBCamera::GetCatSegment(cv::Mat & cat_segment)
+    {
+      if (!category_seg_queue_.empty())
+      {
+        RGBCameraTypes::Segement_t category_seg = category_seg_queue_.front();
+        cat_segment = category_seg.image;
+        category_seg_queue_.pop_front();
+      }
+    }
+
     void RGBCamera::FeedImageQueue(const ros::Time & img_timestamp,
       std::unordered_map<RGBCameraTypes::PostProcessingID, cv::Mat> & images)
     {
@@ -192,7 +232,7 @@ namespace RPGQ
         rgb_image.image = images[RGBCameraTypes::RGB];
         rgb_image.elapsed_useconds = ROSTIME_TO_USECS(img_timestamp);
         // set lower max queue size to prevent infinite memory usage
-        if (image_queue_.size() > queue_size_) image_queue_.resize(queue_size_);
+        if (image_queue_.size() >= queue_size_) image_queue_.resize(queue_size_-1);
         image_queue_.push_back(rgb_image);
         queue_mutex_.unlock();
       }
@@ -203,7 +243,7 @@ namespace RPGQ
         depth_image.image = images[RGBCameraTypes::Depth];
         depth_image.elapsed_useconds = ROSTIME_TO_USECS(img_timestamp);
         // set lower max queue size to prevent infinite memory usage
-        if (depth_queue_.size() > queue_size_) depth_queue_.resize(queue_size_);
+        if (depth_queue_.size() >= queue_size_) depth_queue_.resize(queue_size_-1);
         depth_queue_.push_back(depth_image);
         queue_mutex_.unlock();
       }
@@ -215,7 +255,7 @@ namespace RPGQ
        optical_flow_image.image = images[RGBCameraTypes::OpticalFlow];
        optical_flow_image.elapsed_useconds = ROSTIME_TO_USECS(img_timestamp);
        // set lower max queue size to prevent infinite memory usage
-       if (optical_flow_queue_.size() > queue_size_) optical_flow_queue_.resize(queue_size_);
+       if (optical_flow_queue_.size() >= queue_size_) optical_flow_queue_.resize(queue_size_-1);
        optical_flow_queue_.push_back(optical_flow_image);
        queue_mutex_.unlock();
      }
@@ -227,7 +267,7 @@ namespace RPGQ
         obj_seg_image.image = images[RGBCameraTypes::ObjectSegment];
         obj_seg_image.elapsed_useconds = ROSTIME_TO_USECS(img_timestamp);
         // set lower max queue size to prevent infinite memory usage
-        if (obj_seg_queue_.size() > queue_size_) obj_seg_queue_.resize(queue_size_);
+        if (obj_seg_queue_.size() >= queue_size_) obj_seg_queue_.resize(queue_size_-1);
         obj_seg_queue_.push_back(obj_seg_image);
         queue_mutex_.unlock();
       }
@@ -238,7 +278,7 @@ namespace RPGQ
         category_seg_image.image = images[RGBCameraTypes::CategorySegment];
         category_seg_image.elapsed_useconds = ROSTIME_TO_USECS(img_timestamp);
         // set lower max queue size to prevent infinite memory usage
-        if (category_seg_queue_.size() > queue_size_) category_seg_queue_.resize(queue_size_);
+        if (category_seg_queue_.size() >= queue_size_) category_seg_queue_.resize(queue_size_-1);
         category_seg_queue_.push_back(category_seg_image);
         queue_mutex_.unlock();
       }

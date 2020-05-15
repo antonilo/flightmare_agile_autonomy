@@ -124,8 +124,12 @@ namespace RPGQ
       std::vector<std::string> GetPostProcessing(void);
       sensor_msgs::CameraInfo GetCameraInfo(const USecs & elapsed_useconds);
 
-      // 
+      // get image functions
       void GetRGBImage(cv::Mat & rgb_img);
+      void GetDepthmap(cv::Mat & depth_map);
+      void GetOpticalFlow(cv::Mat & optical_flow);
+      void GetObjSegment(cv::Mat & obj_segment);
+      void GetCatSegment(cv::Mat & cat_segment);
       
       // public set functions
       void SetChanel(const int & channels) { channels_ = channels;};
