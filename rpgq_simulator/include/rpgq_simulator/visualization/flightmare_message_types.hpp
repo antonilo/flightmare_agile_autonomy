@@ -122,6 +122,19 @@ namespace RPGQ
       std::vector<Object_t> objects;
     };
 
+    struct PointCloudMessage_t
+    {
+      int scene_id{0};
+      std::vector<double> bounding_box_scale{100.0, 100.0, 100.0};
+      std::vector<double> bounding_box_origin{0.0, 0.0, 0.0};
+      double resolution_z{0.05};
+      double ground_z_limit{0.2};
+      double resolution_above_ground{0.15};
+      double resolution_below_ground{0.3};
+      std::string path{"point_clouds_data/"};
+      std::string file_name{"default"};
+    };
+
     //
     struct Sub_Vehicle_t
     {
@@ -201,6 +214,19 @@ namespace RPGQ
       j = json{{"ntime", o.ntime},
                {"vehicles", o.vehicles},
                {"objects", o.objects}
+      };
+    }
+
+    inline void to_json(json &j, const PointCloudMessage_t &o){
+      j = json{{"scene_id", o.scene_id},
+              {"bounding_box_scale", o.bounding_box_scale},
+              {"bounding_box_origin", o.bounding_box_origin},
+              {"resolution_z", o.resolution_z},
+              {"ground_z_limit", o.ground_z_limit},
+              {"resolution_above_ground", o.resolution_above_ground},
+              {"resolution_below_ground", o.resolution_below_ground},
+              {"path", o.path},
+              {"file_name", o.file_name}
       };
     }
 
