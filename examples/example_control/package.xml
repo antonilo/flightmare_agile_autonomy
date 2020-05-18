@@ -17,6 +17,7 @@
   <depend>rpgq_simulator</depend>
   <depend>quadrotor_common</depend>
   <depend>quadrotor_msgs</depend>
+  <depend>eigen_catkin</depend>
   <depend>polynomial_trajectories</depend>
   <depend>std_msgs</depend>
   <depend>geometry_msgs</depend>
