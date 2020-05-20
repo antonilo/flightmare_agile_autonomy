@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<launch>
+    <arg name="debug" default="0" />
+    <arg name="editor" default="1" />
+    <arg name="scene_name" default="Warehouse/Scenes/DemoScene"/>
+
+    <param name="use_sim_time" value="true"/>
+
+    <node name="simulator" pkg="example_pcd" type="pcd_pub" output="screen" launch-prefix="gdb -ex run --args" if="$(arg debug)">
+        <param name="scene_name" value="$(arg scene_name)" />
+    </node>
+    <node name="simulator" pkg="example_pcd" type="pcd_pub" output="screen" unless="$(arg debug)">
+        <param name="scene_name" value="$(arg scene_name)" />
+    </node>
+
+</launch>
