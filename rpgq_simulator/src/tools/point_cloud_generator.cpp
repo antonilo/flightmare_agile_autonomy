@@ -24,4 +24,6 @@ void RPGQ::Simulator::pointCloudGenerator(RPGQ::Simulator::PointCloudMessage_t &
     json json_msg = pcd_msg;
     msg << json_msg.dump();
     pub_.send(msg, true);
+
+    pub_.close();
 }

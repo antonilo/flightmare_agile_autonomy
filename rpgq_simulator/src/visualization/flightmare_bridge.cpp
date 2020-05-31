@@ -22,8 +22,26 @@ bool FlightmareBridge::connectUnity() {
 void FlightmareBridge::disconnectUnity() {
   unity_ready_ = false;
   // create new message object
-  // pub_.close();
-  // sub_.close();
+  std::string client_address_dis_{"tcp://*"};
+  std::string pub_port_dis_{"10255"};
+  zmqpp::context context_dis_;
+  zmqpp::socket pub_dis_{context_dis_, zmqpp::socket_type::publish};
+  pub_dis_.set(zmqpp::socket_option::send_high_water_mark, 6);
+  pub_dis_.bind(client_address_dis_ + ":" + pub_port_dis_);
+
+  // wait until publisher is properly connected
+  usleep(1000000);
+  zmqpp::message msg_dis_;
+  ROS_INFO("Disconnect from Unity!");
+  msg_dis_ << "DISCONNECT";
+  pub_dis_.send(msg_dis_, true);
+
+  RPGQ::FlightmareTypes::ImgID send_id = 1;
+  getRender(send_id);
+
+  pub_.close();
+  sub_.close();
+  pub_dis_.close();
 }
 
 std::vector<double> FlightmareBridge::positionROS2Unity(
