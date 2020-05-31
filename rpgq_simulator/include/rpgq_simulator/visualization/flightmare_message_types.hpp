@@ -32,6 +32,7 @@ namespace RPGQ
     typedef size_t SceneID;
     const SceneID SCENE_WAREHOUSE = 0;
     const SceneID SCENE_NATUREFOREST = 3;
+    const SceneID SCENE_EMPTYFOREST = 4;
   }
 
   namespace Simulator
@@ -135,6 +136,21 @@ namespace RPGQ
       std::string file_name{"default"};
     };
 
+    struct TreeMessage_t
+    {
+      std::vector<double> bounding_area{25.0, 25.0};
+      std::vector<double> bounding_origin{0.0, 0.0};
+      double density{4.0};
+    };
+        
+    struct LightMessage_t
+    {
+      double red{0};
+      double green{0};
+      double blue{0};
+      double intensity{1.0};
+    };
+
     //
     struct Sub_Vehicle_t
     {
@@ -227,6 +243,21 @@ namespace RPGQ
               {"resolution_below_ground", o.resolution_below_ground},
               {"path", o.path},
               {"file_name", o.file_name}
+      };
+    }
+
+    inline void to_json(json &j, const TreeMessage_t &o){
+      j = json{{"bounding_area", o.bounding_area},
+              {"bounding_origin", o.bounding_origin},
+              {"density", o.density}
+      };
+    }
+
+    inline void to_json(json &j, const LightMessage_t &o){
+      j = json{{"red", o.red},
+              {"green", o.green},
+              {"blue", o.blue},
+              {"intensity", o.intensity}
       };
     }
 
