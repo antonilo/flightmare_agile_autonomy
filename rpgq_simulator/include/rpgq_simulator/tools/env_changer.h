@@ -39,6 +39,8 @@ namespace RPGQ {
         V(Value): 0 - 1.00 (double)
         
         output[3]: Output, array size 3, int
+
+        https://gist.github.com/kuathadianto/200148f53616cbd226d993b400214a7f
         */
         void HSVToRGB(int H, double S, double V, int output[3]);
 
