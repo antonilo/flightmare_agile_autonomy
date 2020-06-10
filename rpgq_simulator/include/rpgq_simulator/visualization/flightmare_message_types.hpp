@@ -141,6 +141,7 @@ namespace RPGQ
       std::vector<double> bounding_area{25.0, 25.0};
       std::vector<double> bounding_origin{0.0, 0.0};
       double density{4.0};
+      int seed{0};
     };
         
     struct LightMessage_t
@@ -249,7 +250,8 @@ namespace RPGQ
     inline void to_json(json &j, const TreeMessage_t &o){
       j = json{{"bounding_area", o.bounding_area},
               {"bounding_origin", o.bounding_origin},
-              {"density", o.density}
+              {"density", o.density},
+              {"seed", o.seed}
       };
     }
 
