@@ -141,7 +141,7 @@ namespace RPGQ
       std::vector<double> bounding_area{25.0, 25.0};
       std::vector<double> bounding_origin{0.0, 0.0};
       double density{4.0};
-      int seed{0};
+      int seed{-1};
     };
         
     struct LightMessage_t

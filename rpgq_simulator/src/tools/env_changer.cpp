@@ -2,7 +2,7 @@
 #include <iostream>
 #include <string>
 #include <unistd.h>
-#include<cmath>
+#include <cmath>
 #include <zmqpp/zmqpp.hpp>
 
 #include <rpgq_simulator/visualization/flightmare_message_types.hpp>
@@ -31,6 +31,11 @@ void RPGQ::Simulator::placeTrees(RPGQ::Simulator::TreeMessage_t &tree_msg, doubl
     usleep(1000000);
     zmqpp::message msg;
     msg << "PLACETREE";
+    
+    // check if seed is not initialized
+    if (tree_msg.seed == -1)
+        tree_msg.seed = rand();
+
     json json_msg = tree_msg;
     msg << json_msg.dump();
     pub_.send(msg, true);
