@@ -25,6 +25,42 @@ namespace RPGQ {
         void rmTrees();
 
         /*
+        Send ZMQ message with the desired origin, area and density of objects 
+        that should be placed.
+
+        The objects are placed on the ground within the given x,y postion at a
+        random scale and rotation.
+
+        The objects need to be added before build to the folder Resources/Objects.
+
+        Unity standalone has to be running while using this command.
+
+        */
+        void placeObjects(ObjectMessage_t &obj_msg, double timeout = 60.0);
+
+        /*
+        Send ZMQ message with the desired origin, area and density of objects 
+        that should be placed.
+
+        The objects are placed on the ground within the given x,y postion at a
+        random scale (fixed ratio) and rotation.
+
+        The objects need to be added before build to the folder Resources/Objects.
+
+        Unity standalone has to be running while using this command.
+
+        */
+        void placeFixRatioObjects(FixRatioObjectMessage_t &obj_msg, double timeout = 60.0);
+
+        /*
+        All placed objects are removed from the scene.
+
+        Does not remove objects that have been added to the scene in the unity 
+        editor without the object tag.
+        */
+        void rmObjects();
+
+        /*
         Change color and intensity of all the light objects in the scene.
 
         Does not change the skybox or backed lightning.

@@ -143,6 +143,32 @@ namespace RPGQ
       double density{4.0};
       int seed{-1};
     };
+
+    struct ObjectMessage_t
+    {
+      std::string name = "Cube"; // Cube, Sphere, Cylinder
+      std::vector<double> bounding_area{25.0, 25.0};
+      std::vector<double> bounding_origin{0.0, 0.0};
+      double density{4.0};
+      std::vector<double> scale_min{0.1, 0.3, 2.0,};
+      std::vector<double> scale_max{1.0, 0.3, 10.0};
+      double rot_min{0.0};  // rotation around z-axix
+      double rot_max{360.0};
+      int seed{-1};
+    };
+
+    struct FixRatioObjectMessage_t
+    {
+      std::string name = "Cube"; // Cube, Sphere, Cylinder
+      std::vector<double> bounding_area{25.0, 25.0};
+      std::vector<double> bounding_origin{0.0, 0.0};
+      double density{4.0};
+      double scale_min{0.1};
+      double scale_max{2.0};
+      double rot_min{0.0};  // rotation around z-axix
+      double rot_max{360.0};
+      int seed{-1};
+    };
         
     struct LightMessage_t
     {
@@ -252,6 +278,32 @@ namespace RPGQ
               {"bounding_origin", o.bounding_origin},
               {"density", o.density},
               {"seed", o.seed}
+      };
+    }
+
+    inline void to_json(json &j, const ObjectMessage_t &o){
+      j = json{{"bounding_area", o.bounding_area},
+              {"bounding_origin", o.bounding_origin},
+              {"density", o.density},
+              {"seed", o.seed},
+              {"name", o.name},
+              {"scale_min", o.scale_min},
+              {"scale_max", o.scale_max},
+              {"rot_min", o.rot_min},
+              {"rot_max", o.rot_max}
+      };
+    }
+
+    inline void to_json(json &j, const FixRatioObjectMessage_t &o){
+      j = json{{"bounding_area", o.bounding_area},
+              {"bounding_origin", o.bounding_origin},
+              {"density", o.density},
+              {"seed", o.seed},
+              {"name", o.name},
+              {"scale_min", o.scale_min},
+              {"scale_max", o.scale_max},
+              {"rot_min", o.rot_min},
+              {"rot_max", o.rot_max}
       };
     }
 
