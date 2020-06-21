@@ -7,11 +7,8 @@
 
     <node name="rpgg_flightmare_Renderer" pkg="rpgq_simulator" type="RPG_FLIGHTMARE.x86_64" unless="$(arg editor)"/>
 
-    <node name="simulator" pkg="example_control" type="quad_waypoints" output="screen" launch-prefix="gdb -ex run --args" if="$(arg debug)" >
-        <param name="scene_name" value="$(arg scene_name)" />
-    </node>
-    <node name="simulator" pkg="example_control" type="quad_waypoints" output="screen" unless="$(arg debug)">
-        <param name="scene_name" value="$(arg scene_name)" />
-    </node>
+    <node name="simulator" pkg="example_control" type="quad_waypoints" output="screen" launch-prefix="gdb -ex run --args" if="$(arg debug)" />
+    
+    <node name="simulator" pkg="example_control" type="quad_waypoints" output="screen" unless="$(arg debug)"/>
 
 </launch>
