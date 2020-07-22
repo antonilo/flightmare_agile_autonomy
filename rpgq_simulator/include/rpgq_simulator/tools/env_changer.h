@@ -28,7 +28,7 @@ namespace RPGQ {
         Send ZMQ message with the desired origin, area and density of objects 
         that should be placed.
 
-        The objects are placed on the ground within the given x,y postion at a
+        The objects are placed at the given x,y,z postion at a
         random scale and rotation.
 
         The objects need to be added before build to the folder Resources/Objects.
