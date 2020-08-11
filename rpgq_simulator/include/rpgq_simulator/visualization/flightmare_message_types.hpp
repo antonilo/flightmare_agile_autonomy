@@ -133,6 +133,7 @@ struct ObjectMessage_t {
   std::vector<double> bounding_area{25.0, 25.0, 25.0};
   std::vector<double> bounding_origin{0.0, 0.0, 0.0};
   double density{4.0};
+  double rand_size{0.0};
   std::vector<double> scale_min{
       0.1,
       0.3,
@@ -259,6 +260,7 @@ inline void to_json(json &j, const ObjectMessage_t &o) {
   j = json{{"bounding_area", o.bounding_area},
            {"bounding_origin", o.bounding_origin},
            {"density", o.density},
+           {"rand_size", o.rand_size},
            {"seed", o.seed},
            {"name", o.name},
            {"scale_min", o.scale_min},
