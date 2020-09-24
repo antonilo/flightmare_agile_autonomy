@@ -30,6 +30,9 @@ typedef size_t SceneID;
 const SceneID SCENE_WAREHOUSE = 0;
 const SceneID SCENE_NATUREFOREST = 3;
 const SceneID SCENE_EMPTYFOREST = 4;
+const SceneID SCENE_GRANDCANYON = 5;
+const SceneID SCENE_WASTELAND = 6;
+const SceneID SCENE_JAPANESE = 7;
 }  // namespace FlightmareTypes
 
 namespace Simulator {
