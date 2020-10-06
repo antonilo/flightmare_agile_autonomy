@@ -122,6 +122,7 @@ struct PointCloudMessage_t {
   double resolution_below_ground{0.3};
   std::string path{"point_clouds_data/"};
   std::string file_name{"default"};
+  double unity_ground_offset{0.3};
 };
 
 struct TreeMessage_t {
@@ -249,7 +250,8 @@ inline void to_json(json &j, const PointCloudMessage_t &o) {
            {"resolution_above_ground", o.resolution_above_ground},
            {"resolution_below_ground", o.resolution_below_ground},
            {"path", o.path},
-           {"file_name", o.file_name}};
+           {"file_name", o.file_name},
+           {"unity_ground_offset", o.unity_ground_offset}};
 }
 
 inline void to_json(json &j, const TreeMessage_t &o) {
