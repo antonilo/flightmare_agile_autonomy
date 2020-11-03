@@ -300,7 +300,7 @@ bool FlightmareBridge::handleSettings() {
     }
     done = json::parse(metadata_string).at("ready").get<bool>();
   }
-  std::cout << "Ready ? : " << done << std::endl;
+  std::cout << "\rReady ? : "  << done << std::flush << std::endl;
   return done;
 }
 
