@@ -45,7 +45,7 @@ void FlightmareBridge::disconnectUnity() {
 }
 
 std::vector<double> FlightmareBridge::positionROS2Unity(
-  const Eigen::Vector3d & ros_pos) {
+    const Eigen::Vector3d &ros_pos) {
   // tranform position from ROS coordinate system (right-handed)
   // to Unity coordinate system (left-handed)
   std::vector<double> unity_pos{ros_pos[0], ros_pos[2], ros_pos[1]};
@@ -53,30 +53,49 @@ std::vector<double> FlightmareBridge::positionROS2Unity(
 }
 
 std::vector<double> FlightmareBridge::rotationROS2Unity(
-  const Eigen::Quaterniond & ros_quat) {
+    const Eigen::Quaterniond &ros_quat) {
   // tranform rotation (quaternion) from ROS coordinate system (right hand)
   // to Unity coordinate system (left hand)
   static Eigen::Matrix3d T;
-  T(0, 0) = 1.0; T(0, 1) = 0.0; T(0, 2) = 0.0;
-  T(1, 0) = 0.0; T(1, 1) = 0.0; T(1, 2) = 1.0;
-  T(2, 0) = 0.0; T(2, 1) = 1.0; T(2, 2) = 0.0;
+  T(0, 0) = 1.0;
+  T(0, 1) = 0.0;
+  T(0, 2) = 0.0;
+  T(1, 0) = 0.0;
+  T(1, 1) = 0.0;
+  T(1, 2) = 1.0;
+  T(2, 0) = 0.0;
+  T(2, 1) = 1.0;
+  T(2, 2) = 0.0;
   Eigen::Matrix3d R_unity = T * ros_quat.toRotationMatrix() * T.transpose();
   Eigen::Quaterniond q_unity(R_unity);
-  std::vector<double> unity_quat{q_unity.x(), q_unity.y(), q_unity.z(), q_unity.w()};
+  std::vector<double> unity_quat{q_unity.x(), q_unity.y(), q_unity.z(),
+                                 q_unity.w()};
   return unity_quat;
 }
 
 std::vector<double> FlightmareBridge::matrix44ROS2Unity(
-  const Eigen::Matrix4d & ros_trans) {
+    const Eigen::Matrix4d &ros_trans) {
   static Eigen::Matrix4d T;
-  T(0, 0) = 1.0; T(0, 1) = 0.0; T(0, 2) = 0.0; T(0, 3) = 0.0;
-  T(1, 0) = 0.0; T(1, 1) = 0.0; T(1, 2) = 1.0; T(1, 3) = 0.0;
-  T(2, 0) = 0.0; T(2, 1) = 1.0; T(2, 2) = 0.0; T(2, 3) = 0.0;
-  T(3, 0) = 0.0; T(3, 1) = 0.0; T(3, 2) = 0.0; T(3, 3) = 1.0;
+  T(0, 0) = 1.0;
+  T(0, 1) = 0.0;
+  T(0, 2) = 0.0;
+  T(0, 3) = 0.0;
+  T(1, 0) = 0.0;
+  T(1, 1) = 0.0;
+  T(1, 2) = 1.0;
+  T(1, 3) = 0.0;
+  T(2, 0) = 0.0;
+  T(2, 1) = 1.0;
+  T(2, 2) = 0.0;
+  T(2, 3) = 0.0;
+  T(3, 0) = 0.0;
+  T(3, 1) = 0.0;
+  T(3, 2) = 0.0;
+  T(3, 3) = 1.0;
   Eigen::Matrix4d TRAN_unity = T * ros_trans * T.transpose();
   std::vector<double> tran_unity;
-  for (int i=0; i<4; ++i){
-    for (int j=0; j<4; ++j){
+  for (int i = 0; i < 4; ++i) {
+    for (int j = 0; j < 4; ++j) {
       tran_unity.push_back(TRAN_unity(i, j));
     }
   }
@@ -84,7 +103,7 @@ std::vector<double> FlightmareBridge::matrix44ROS2Unity(
 }
 
 std::vector<double> FlightmareBridge::sizeROS2Unity(
-  const Eigen::Vector3d & ros_size) {
+    const Eigen::Vector3d &ros_size) {
   // 3D size from right hand coordinate system to left hand coordinate system.
   std::vector<double> unity_size{ros_size[0], ros_size[2], ros_size[1]};
   return unity_size;
@@ -105,8 +124,7 @@ void FlightmareBridge::addQuad(std::shared_ptr<QuadrotorVehicle> quad) {
   unity_vehicles_.emplace(vehicle_t.ID, quad);
 }
 
-void FlightmareBridge::addQuadLidar(std::shared_ptr<QuadLidar>
-  quad_lidar) {
+void FlightmareBridge::addQuadLidar(std::shared_ptr<QuadLidar> quad_lidar) {
   std::cout << "Adding a Quadrotor with LiDAR" << std::endl;
   // add quadrotor that does not have attached camera
   Vehicle_t vehicle_t;
@@ -130,12 +148,11 @@ void FlightmareBridge::addQuadLidar(std::shared_ptr<QuadLidar>
   pub_msg_.vehicles.push_back(vehicle_t);
   //
   unity_vehicles_.emplace(vehicle_t.ID, quad);
-  unity_lidars_.emplace(vehicle_t.ID+"_"+lidar_t.ID, lidar);
+  unity_lidars_.emplace(vehicle_t.ID + "_" + lidar_t.ID, lidar);
 }
 
 //
-void FlightmareBridge::addQuadRGB(std::shared_ptr<QuadRGBCamera>
-  quad_rgb) {
+void FlightmareBridge::addQuadRGB(std::shared_ptr<QuadRGBCamera> quad_rgb) {
   std::cout << "Adding a Quadrotor with RGB Camera" << std::endl;
   // add quadrotor that has an RGB camera attached.
   Vehicle_t vehicle_t;
@@ -163,12 +180,12 @@ void FlightmareBridge::addQuadRGB(std::shared_ptr<QuadRGBCamera>
   pub_msg_.vehicles.push_back(vehicle_t);
   //
   unity_vehicles_.emplace(vehicle_t.ID, quad);
-  unity_cameras_.emplace(vehicle_t.ID+"_"+camera_t.ID, cam);
+  unity_cameras_.emplace(vehicle_t.ID + "_" + camera_t.ID, cam);
 }
 
 //
-void FlightmareBridge::addQuadStereoRGB(std::shared_ptr<QuadStereoRGBCamera>
-  stereo_quad_rgb) {
+void FlightmareBridge::addQuadStereoRGB(
+    std::shared_ptr<QuadStereoRGBCamera> stereo_quad_rgb) {
   // add quadrotor that has an RGB camera attached.
   Vehicle_t vehicle_t;
   std::shared_ptr<QuadrotorVehicle> quad = stereo_quad_rgb->GetQuad();
@@ -209,8 +226,8 @@ void FlightmareBridge::addQuadStereoRGB(std::shared_ptr<QuadStereoRGBCamera>
   pub_msg_.vehicles.push_back(vehicle_t);
   //
   unity_vehicles_.emplace(vehicle_t.ID, quad);
-  unity_cameras_.emplace(vehicle_t.ID+"_"+left_camera_t.ID, left_cam);
-  unity_cameras_.emplace(vehicle_t.ID+"_"+right_camera_t.ID, right_cam);
+  unity_cameras_.emplace(vehicle_t.ID + "_" + left_camera_t.ID, left_cam);
+  unity_cameras_.emplace(vehicle_t.ID + "_" + right_camera_t.ID, right_cam);
 }
 
 //
@@ -229,18 +246,16 @@ void FlightmareBridge::addObject(std::shared_ptr<UnityObject> obj) {
 }
 
 // public get functions
-void FlightmareBridge::getRender(const FlightmareTypes::ImgID & ntime) {
+void FlightmareBridge::getRender(const FlightmareTypes::ImgID &ntime) {
   pub_msg_.ntime = ntime;
-  for(size_t idx=0; idx < pub_msg_.vehicles.size(); idx++)
-  {
+  for (size_t idx = 0; idx < pub_msg_.vehicles.size(); idx++) {
     Vehicle_t vehicle_i = pub_msg_.vehicles[idx];
     std::shared_ptr<QuadrotorVehicle> quad = unity_vehicles_[vehicle_i.ID];
     pub_msg_.vehicles[idx].position = positionROS2Unity(quad->GetPos());
     pub_msg_.vehicles[idx].rotation = rotationROS2Unity(quad->GetQuat());
   }
 
-  for (size_t idx=0; idx < pub_msg_.objects.size(); idx++)
-  {
+  for (size_t idx = 0; idx < pub_msg_.objects.size(); idx++) {
     Object_t object_i = pub_msg_.objects[idx];
     std::shared_ptr<UnityObject> object = unity_objects_[object_i.ID];
     pub_msg_.objects[idx].position = positionROS2Unity(object->GetPos());
@@ -295,16 +310,16 @@ bool FlightmareBridge::handleSettings() {
     std::string metadata_string = msg.get(0);
     // std::cout << metadata_string << std::endl;
     // Parse metadata
-    if (json::parse(metadata_string).size() > 1 ) {
-      return false; // hack
+    if (json::parse(metadata_string).size() > 1) {
+      return false;  // hack
     }
     done = json::parse(metadata_string).at("ready").get<bool>();
   }
-  std::cout << "\rReady ? : "  << done << std::flush << std::endl;
+  std::cout << "\rReady ? : " << done << std::flush << std::endl;
   return done;
 }
 
-FlightmareTypes::ImgID FlightmareBridge::handleOutput(RenderMessage_t & output) {
+FlightmareTypes::ImgID FlightmareBridge::handleOutput(RenderMessage_t &output) {
   // create new message object
   zmqpp::message msg;
   sub_.receive(msg);
@@ -317,46 +332,48 @@ FlightmareTypes::ImgID FlightmareBridge::handleOutput(RenderMessage_t & output) 
   timestamp = timestamp.fromNSec(sub_msg.ntime);
 
   // ensureBufferIsAllocated(sub_msg);
-  size_t image_i=1; size_t camera_i=0;
-  for (int i=0; i< settings_.vehicles.size(); i++)
-  {
+  size_t image_i = 1;
+  size_t camera_i = 0;
+  for (int i = 0; i < settings_.vehicles.size(); i++) {
     // update vehicle collision flag
     Vehicle_t vehicle = settings_.vehicles[i];
     std::shared_ptr<QuadrotorVehicle> quad = unity_vehicles_[vehicle.ID];
     quad->SetCollision(sub_msg.sub_vehicles[i].collision);
 
     // feed lidar ranges
-    if (unity_lidars_.size()>0)
-    {
+    if (unity_lidars_.size() > 0) {
       // TODO: For now we only consider the first lidar attached on the vehicle
-      std::shared_ptr<Lidar> lidar = unity_lidars_[vehicle.ID+"_"+vehicle.lidars[0].ID];
+      std::shared_ptr<Lidar> lidar =
+          unity_lidars_[vehicle.ID + "_" + vehicle.lidars[0].ID];
       std::vector<double> lidar_ranges;
-      for (auto lidar_range_i : sub_msg.sub_vehicles[i].lidar_ranges){
+      for (auto lidar_range_i : sub_msg.sub_vehicles[i].lidar_ranges) {
         lidar_ranges.push_back(lidar_range_i);
       }
       lidar->FeedLidarQueue(timestamp, lidar_ranges);
     }
 
     // feed image data to RGB camera
-    for (const auto & cam : vehicle.cameras) {
+    for (const auto &cam : vehicle.cameras) {
       std::unordered_map<std::string, cv::Mat> images;
       std::string camera_ID = vehicle.ID + "_" + cam.ID;
       std::shared_ptr<RGBCamera> rgb_camera = unity_cameras_[camera_ID];
 
-      uint32_t imageLen =  cam.width * cam.height * cam.channels;
+      uint32_t imageLen = cam.width * cam.height * cam.channels;
       // Get raw image bytes from ZMQ message.
-      // WARNING: This is a zero-copy operation that also casts the input to an array of unit8_t.
-      // when the message is deleted, this pointer is also dereferenced.
+      // WARNING: This is a zero-copy operation that also casts the input to an
+      // array of unit8_t. when the message is deleted, this pointer is also
+      // dereferenced.
       const uint8_t *imageData;
       msg.get(imageData, image_i);
       image_i = image_i + 1;
       //
       uint32_t bufferRowLength = cam.width * cam.channels;
       // Pack image into cv::Mat
-      cv::Mat new_image = cv::Mat(cam.height, cam.width,
-                                  CV_MAKETYPE(CV_8U, cam.channels));
+      cv::Mat new_image =
+          cv::Mat(cam.height, cam.width, CV_MAKETYPE(CV_8U, cam.channels));
       memcpy(new_image.data, imageData, imageLen);
-      // Flip image since OpenCV origin is upper left, but Unity's is lower left.
+      // Flip image since OpenCV origin is upper left, but Unity's is lower
+      // left.
       cv::flip(new_image, new_image, 0);
 
       // Tell OpenCv that the input is RGB.
@@ -364,25 +381,54 @@ FlightmareTypes::ImgID FlightmareBridge::handleOutput(RenderMessage_t & output) 
         cv::cvtColor(new_image, new_image, CV_RGB2BGR);
       }
       images.emplace("rgb", new_image);
-      for (const auto & pp : cam.post_processing){
-        //
-        const uint8_t *pp_imageData;
-        msg.get(pp_imageData, image_i);
-        image_i = image_i + 1;
-        //
-        uint32_t pp_bufferRowLength = cam.width * cam.channels;
-        // Pack image into cv::Mat
-        cv::Mat pp_image = cv::Mat(cam.height, cam.width,
-                                    CV_MAKETYPE(CV_8U, cam.channels));
-        memcpy(pp_image.data, pp_imageData, imageLen);
-        // Flip image since OpenCV origin is upper left, but Unity's is lower left.
-        cv::flip(pp_image, pp_image, 0);
+      size_t post_press_idx = 0;
+      for (const auto &pp : cam.post_processing) {
+        if (post_press_idx == 0) {
+          // depth
+          uint32_t image_len = cam.width * cam.height * 4;
+          // Get raw image bytes from ZMQ message.
+          // WARNING: This is a zero-copy operation that also casts the input to
+          // an array of unit8_t. when the message is deleted, this pointer is
+          // also dereferenced.
+          const uint8_t *image_data;
+          msg.get(image_data, image_i);
+          image_i = image_i + 1;
+          // Pack image into cv::Mat
+          cv::Mat pp_image = cv::Mat(cam.height, cam.width, CV_32FC1);
+          memcpy(pp_image.data, image_data, image_len);
+          // Flip image since OpenCV origin is upper left, but Unity's is lower
+          // left.
+          pp_image = pp_image * (1000.f);
+          cv::flip(pp_image, pp_image, 0);
 
-        // Tell OpenCv that the input is RGB.
-        if (cam.channels) {
-          cv::cvtColor(pp_image, pp_image, CV_RGB2BGR);
+          // unity_quadrotors_[idx]
+          //     ->getCameras()[cam.output_index]
+          //     ->feedImageQueue(layer_idx, new_image);
+          images.emplace(pp, pp_image);
+
+        } else {
+          //
+          const uint8_t *pp_imageData;
+          msg.get(pp_imageData, image_i);
+          image_i = image_i + 1;
+          //
+          uint32_t pp_bufferRowLength = cam.width * cam.channels;
+          // Pack image into cv::Mat
+          cv::Mat pp_image =
+              cv::Mat(cam.height, cam.width, CV_MAKETYPE(CV_8U, cam.channels));
+          memcpy(pp_image.data, pp_imageData, imageLen);
+          // Flip image since OpenCV origin is upper left, but Unity's is lower
+          // left.
+          cv::flip(pp_image, pp_image, 0);
+
+          // Tell OpenCv that the input is RGB.
+          if (cam.channels) {
+            cv::cvtColor(pp_image, pp_image, CV_RGB2BGR);
+          }
+          images.emplace(pp, pp_image);
         }
-        images.emplace(pp, pp_image);
+
+        post_press_idx += 1;
       }
       //
       rgb_camera->FeedImageQueue(timestamp, images);
@@ -392,5 +438,5 @@ FlightmareTypes::ImgID FlightmareBridge::handleOutput(RenderMessage_t & output) 
   return sub_msg.ntime;
 }
 
-} // namespace Simulator
-} // namespace RPGQ
+}  // namespace Simulator
+}  // namespace RPGQ
